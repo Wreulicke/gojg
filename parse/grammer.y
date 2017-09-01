@@ -12,12 +12,13 @@ import "github.com/wreulicke/gojg/ast"
 }
 
 %type<ast> json_template value boolean_template number_template array object
+%type<token> stirngOrTemplate
 %type<values> elements members
 %token<token> NUMBER
 %token<token> FALSE
 %token<token> NULL
 %token<token> TRUE
-%token<token> STRING
+%token<token> STRING STRING_TEMPLATE
 %token<token> TEMPLATE_BEGIN TEMPLATE_END
 %token<> BOOLEAN_PREFIX
 %token<token> ID
@@ -54,9 +55,17 @@ value:
     | array {
         $$ = $1
     }
-    | STRING {
+    | stirngOrTemplate {
         text := $1.literal
         $$ = &ast.ValueNode{Value: text[1:len(text)-1]}
+    }
+
+stirngOrTemplate: STRING 
+    {
+        $$ = $1
+    }
+    | STRING_TEMPLATE {
+        $$ = $1
     }
 
 boolean_template: BOOLEAN_PREFIX "(" ID ")" 
@@ -73,18 +82,18 @@ object:
     {
         $$ = &ast.ObjectNode{Members: $2}
     }
+
 members: 
-    STRING ":" value {
+    stirngOrTemplate ":" value {
         $$ = []ast.AST{ast.MemberNode{Name: $1.literal, Value: $3}}
     }
-    | STRING ":" value "," members {
+    | stirngOrTemplate ":" value "," members {
         size := len($5)+1
         values := make([]ast.AST, size, size)
         values = append(values, ast.MemberNode{Name: $1.literal, Value: $3})
         values = append(values, $5...)
         $$ = values
     }
-
 
 array: 
     "[" "]" 

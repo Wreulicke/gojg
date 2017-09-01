@@ -2,6 +2,7 @@ package parse
 
 import (
 	"errors"
+	"strings"
 	"text/scanner"
 
 	"github.com/wreulicke/gojg/ast"
@@ -25,10 +26,10 @@ func (l *Lexer) Error(e string) {
 func (l *Lexer) Lex(lval *yySymType) int {
 	ruNe := l.Scan()
 	token := int(ruNe)
+	text := l.TokenText()
 	if token == scanner.Int || token == scanner.Float {
 		token = NUMBER
 	} else if token == scanner.Ident {
-		text := l.TokenText()
 		if text == "bool" {
 			token = BOOLEAN_PREFIX
 		} else if text == "false" {
@@ -42,6 +43,11 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		}
 	} else if token == scanner.String {
 		token = STRING
+		if strings.HasPrefix(text, "{{{") && strings.HasSuffix(text, "}}}") {
+			text = text[3 : len(text)-3]
+			token = STRING_TEMPLATE
+		} else {
+		}
 	} else if ruNe == '{' {
 		if l.Peek() == '{' {
 			l.Next()
@@ -53,7 +59,7 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			token = TEMPLATE_END
 		}
 	}
-	lval.token = Token{typ: token, literal: l.TokenText()}
+	lval.token = Token{typ: token, literal: text}
 	// fmt.Println(lval.token)
 	return token
 }
