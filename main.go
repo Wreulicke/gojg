@@ -24,7 +24,7 @@ func main() {
 		2,
 		3.5
 	]`)
-	ast := parse.Parse("false")
+	ast, _ := parse.Parse("false")
 	switch t := ast.(type) {
 	case *Ast.ValueNode:
 		if t.Value == false {
