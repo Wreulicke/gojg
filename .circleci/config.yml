@@ -19,8 +19,8 @@ jobs:
           command: |
             trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
             go test ./... | tee ${TEST_RESULTS}/go-test.out
-      - run: goverage -coverprofile=${TEST_RESULTS}/go-test.out -covermode=count ./ast ./parse
-      - run: go tool cover -html=${TEST_RESULTS}/go-test.out
+      - run: goverage -coverprofile=${TEST_RESULTS}/cover.out -covermode=count ./ast ./parse
+      - run: go tool cover -html=${TEST_RESULTS}/cover.out -o ${TEST_RESULTS}/cover.html
       - run: go build
 
       - store_artifacts:
