@@ -85,12 +85,12 @@ object:
 
 members: 
     stirngOrTemplate ":" value {
-        $$ = []ast.AST{ast.MemberNode{Name: $1.literal, Value: $3}}
+        $$ = []ast.AST{&ast.MemberNode{Name: $1.literal, Value: $3}}
     }
     | stirngOrTemplate ":" value "," members {
         size := len($5)+1
         values := make([]ast.AST, size, size)
-        values = append(values, ast.MemberNode{Name: $1.literal, Value: $3})
+        values = append(values, &ast.MemberNode{Name: $1.literal, Value: $3})
         values = append(values, $5...)
         $$ = values
     }

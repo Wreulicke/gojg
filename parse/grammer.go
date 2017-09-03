@@ -571,7 +571,7 @@ yydefault:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		//line parse/grammer.y:87
 		{
-			yyVAL.values = []ast.AST{ast.MemberNode{Name: yyDollar[1].token.literal, Value: yyDollar[3].ast}}
+			yyVAL.values = []ast.AST{&ast.MemberNode{Name: yyDollar[1].token.literal, Value: yyDollar[3].ast}}
 		}
 	case 17:
 		yyDollar = yyS[yypt-5 : yypt+1]
@@ -579,7 +579,7 @@ yydefault:
 		{
 			size := len(yyDollar[5].values) + 1
 			values := make([]ast.AST, size, size)
-			values = append(values, ast.MemberNode{Name: yyDollar[1].token.literal, Value: yyDollar[3].ast})
+			values = append(values, &ast.MemberNode{Name: yyDollar[1].token.literal, Value: yyDollar[3].ast})
 			values = append(values, yyDollar[5].values...)
 			yyVAL.values = values
 		}
