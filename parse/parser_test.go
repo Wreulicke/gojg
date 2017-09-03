@@ -8,7 +8,7 @@ import (
 )
 
 func TestParseString(t *testing.T) {
-	r, err := Parse(`test`)
+	r, err := Parse(`"test"`)
 	if err != nil {
 		t.Fatal(err)
 	} else if v, ok := r.(*ast.ValueNode); ok {
