@@ -13,6 +13,6 @@ func TestParseString(t *testing.T) {
 	} else if v, ok := r.(*ast.ValueNode); ok {
 		t.Logf("value: %s", v)
 	} else {
-		t.Fatal("is not value node")
+		t.Fatalf("%s is not value node", r)
 	}
 }
