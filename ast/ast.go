@@ -28,6 +28,3 @@ type ObjectNode struct {
 
 type AST interface {
 }
-
-func test() {
-}
