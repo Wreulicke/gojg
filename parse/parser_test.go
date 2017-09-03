@@ -9,7 +9,7 @@ import (
 
 func TestParseString(t *testing.T) {
 	r, err := Parse(`test`)
-	if err == nil {
+	if err != nil {
 		t.Fatalf("cannot parsed %s", r)
 	} else if v, ok := r.(*ast.ValueNode); ok {
 		t.Logf("value: %s", v)
