@@ -14,4 +14,4 @@
 .glide/
 
 dist
-.output
+*.output
