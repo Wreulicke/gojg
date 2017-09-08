@@ -19,6 +19,7 @@ type Lexer struct {
 	error  error
 }
 
+//go:generate goyacc -o grammer.go grammer.y
 func (l *Lexer) Error(e string) {
 	l.error = errors.New(e)
 }
