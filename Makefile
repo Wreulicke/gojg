@@ -7,6 +7,7 @@ preinstall:
 	go get github.com/jstemmer/go-junit-report
 	go get github.com/haya14busa/goverage
 	go get golang.org/x/tools/cmd/cover
+	go get -u github.com/golang/lint/golint
 
 status:
 	dep status
@@ -16,7 +17,10 @@ install:
 
 update:
 	dep ensure -update
-	
+
+lint: 
+	golint ./...
+
 build:
 	go generate ./...
 

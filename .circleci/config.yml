@@ -12,6 +12,7 @@ jobs:
       - checkout
       - run: mkdir -p $TEST_RESULTS
       - run: make preinstall
+      - run: make lint
       - run: make build
       - run: 
           name: Run unit tests
