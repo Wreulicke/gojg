@@ -22,7 +22,7 @@ jobs:
       - run: go tool cover -html=${TEST_RESULTS}/cover.out -o ${TEST_RESULTS}/cover.html
       - run: make package
       - store_artifacts:
-          path: /dist
+          path: dist
           destination: binary
       - store_artifacts:
           path: /tmp/test-results
