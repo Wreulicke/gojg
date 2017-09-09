@@ -76,6 +76,11 @@ number_literal:
         $$ = &ast.ValueNode{Value: $1.literal}
     }
 
+number_template: 
+    TEMPLATE_BEGIN ID TEMPLATE_END {
+        $$ = &ast.NumberTemplateNode{Id: $2.literal}
+    }
+
 boolean_template: 
     BOOLEAN_PREFIX "(" ID ")" { 
         $$ = &ast.BoolTemplateNode{Id: $3.literal}
@@ -120,11 +125,6 @@ elements:
         values = append(values, $1)
         values = append(values, $3...)
         $$ = values
-    }
-
-number_template: 
-    TEMPLATE_BEGIN ID TEMPLATE_END {
-        $$ = &ast.NumberTemplateNode{Id: $2.literal}
     }
 
 %%
