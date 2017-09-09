@@ -34,14 +34,21 @@ func TestParseBool(t *testing.T) {
 	mustParse(t, "false")
 }
 
-func TestParse(t *testing.T) {
+func TestParseNull(t *testing.T) {
+	mustParse(t, "null")
+}
 
+func TestParseNumber(t *testing.T) {
+	mustParse(t, "{{test}}")
+	mustParse(t, "1")
+	mustParse(t, "-1")
+	mustParse(t, "4.5")
 }
 
 func mustParse(t *testing.T, src string) ast.AST {
 	r, err := Parse(src)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("error: %s, src:%s", err, src)
 	}
 	return r
 }

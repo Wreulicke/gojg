@@ -59,8 +59,9 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			l.Next()
 			token = TEMPLATE_END
 		}
+	} else if ruNe == '-' {
+		token = MINUS
 	}
 	lval.token = Token{typ: token, literal: text}
-	// fmt.Println(lval.token)
 	return token
 }

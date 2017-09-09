@@ -12,8 +12,9 @@ import "github.com/wreulicke/gojg/ast"
 }
 
 %type<ast> json_template value boolean_template number_template array object
-%type<ast> stringOrTemplate
+%type<ast> stringOrTemplate number_literal
 %type<values> elements members
+%token<token> MINUS 
 %token<token> NUMBER
 %token<token> FALSE
 %token<token> NULL
@@ -43,11 +44,8 @@ value:
     | TRUE {
         $$ = &ast.ValueNode{Value: true}
     }
-    | number_template {
+    | number_literal {
         $$ = $1
-    }
-    | NUMBER {
-        $$ = &ast.ValueNode{Value: $1.literal}
     }
     | object  {
         $$ = $1
@@ -59,26 +57,36 @@ value:
         $$ = $1
     }
 
-stringOrTemplate: STRING 
-    {
+stringOrTemplate: 
+    STRING {
         $$ = &ast.ValueNode{Value: $1.literal}
     }
     | STRING_TEMPLATE {
         $$ = &ast.ValueNode{Id: $1.literal}
     }
 
-boolean_template: BOOLEAN_PREFIX "(" ID ")" 
-    { 
+number_literal: 
+    MINUS NUMBER {
+        $$ = &ast.ValueNode{Value: $1.literal + $2.literal}
+    }
+    | number_template {
+        $$ = $1
+    }
+    | NUMBER {
+        $$ = &ast.ValueNode{Value: $1.literal}
+    }
+
+boolean_template: 
+    BOOLEAN_PREFIX "(" ID ")" { 
         $$ = &ast.BoolTemplateNode{Id: $3.literal}
     }
+
 object: 
-    "{" "}" 
-    {
+    "{" "}" {
         $$ = &ast.ObjectNode{Members: []ast.AST{}}
     }
     |
-    "{" members "}" 
-    {
+    "{" members "}" {
         $$ = &ast.ObjectNode{Members: $2}
     }
 
@@ -95,22 +103,18 @@ members:
     }
 
 array: 
-    "[" "]" 
-    {
+    "[" "]" {
         $$ = &ast.ArrayNode{Value: []ast.AST{}}
     }
-    | "[" elements "]"
-    {
+    | "[" elements "]" {
         $$ = &ast.ArrayNode{Value: $2}
     }
 
 elements: 
-    value 
-    { 
+    value { 
         $$ = []ast.AST{$1}
     }
-    | value "," elements
-    {   
+    | value "," elements {   
         size := len($3)+1
         values := make([]ast.AST, size, size)
         values = append(values, $1)
@@ -119,8 +123,7 @@ elements:
     }
 
 number_template: 
-    TEMPLATE_BEGIN ID TEMPLATE_END
-    {
+    TEMPLATE_BEGIN ID TEMPLATE_END {
         $$ = &ast.NumberTemplateNode{Id: $2.literal}
     }
 
