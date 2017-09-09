@@ -12,7 +12,7 @@ import "github.com/wreulicke/gojg/ast"
 }
 
 %type<ast> json_template value boolean_template number_template array object
-%type<ast> stringOrTemplate number_literal
+%type<ast> string_or_template number_literal
 %type<values> elements members
 %token<token> MINUS 
 %token<token> NUMBER
@@ -53,11 +53,11 @@ value:
     | array {
         $$ = $1
     }
-    | stringOrTemplate {
+    | string_or_template {
         $$ = $1
     }
 
-stringOrTemplate: 
+string_or_template: 
     STRING {
         $$ = &ast.ValueNode{Value: $1.literal}
     }
@@ -91,10 +91,10 @@ object:
     }
 
 members: 
-    stringOrTemplate ":" value {
+    string_or_template ":" value {
         $$ = []ast.AST{&ast.MemberNode{Name: $1, Value: $3}}
     }
-    | stringOrTemplate ":" value "," members {
+    | string_or_template ":" value "," members {
         size := len($5)+1
         values := make([]ast.AST, size, size)
         values = append(values, &ast.MemberNode{Name: $1, Value: $3})

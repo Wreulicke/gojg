@@ -56,7 +56,7 @@ const yyEofCode = 1
 const yyErrCode = 2
 const yyInitialStackSize = 16
 
-//line grammer.y:138
+//line grammer.y:130
 
 //line yacctab:1
 var yyExca = [...]int{
@@ -547,49 +547,49 @@ yydefault:
 		}
 	case 12:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line grammer.y:68
+		//line grammer.y:69
 		{
 			yyVAL.ast = &ast.ValueNode{Value: yyDollar[1].token.literal + yyDollar[2].token.literal}
 		}
 	case 13:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line grammer.y:71
+		//line grammer.y:72
 		{
 			yyVAL.ast = yyDollar[1].ast
 		}
 	case 14:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line grammer.y:74
+		//line grammer.y:75
 		{
 			yyVAL.ast = &ast.ValueNode{Value: yyDollar[1].token.literal}
 		}
 	case 15:
 		yyDollar = yyS[yypt-4 : yypt+1]
-		//line grammer.y:81
+		//line grammer.y:80
 		{
 			yyVAL.ast = &ast.BoolTemplateNode{Id: yyDollar[3].token.literal}
 		}
 	case 16:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line grammer.y:87
+		//line grammer.y:85
 		{
 			yyVAL.ast = &ast.ObjectNode{Members: []ast.AST{}}
 		}
 	case 17:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line grammer.y:92
+		//line grammer.y:89
 		{
 			yyVAL.ast = &ast.ObjectNode{Members: yyDollar[2].values}
 		}
 	case 18:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line grammer.y:97
+		//line grammer.y:94
 		{
 			yyVAL.values = []ast.AST{&ast.MemberNode{Name: yyDollar[1].ast, Value: yyDollar[3].ast}}
 		}
 	case 19:
 		yyDollar = yyS[yypt-5 : yypt+1]
-		//line grammer.y:100
+		//line grammer.y:97
 		{
 			size := len(yyDollar[5].values) + 1
 			values := make([]ast.AST, size, size)
@@ -599,25 +599,25 @@ yydefault:
 		}
 	case 20:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line grammer.y:110
+		//line grammer.y:106
 		{
 			yyVAL.ast = &ast.ArrayNode{Value: []ast.AST{}}
 		}
 	case 21:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line grammer.y:114
+		//line grammer.y:109
 		{
 			yyVAL.ast = &ast.ArrayNode{Value: yyDollar[2].values}
 		}
 	case 22:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line grammer.y:120
+		//line grammer.y:114
 		{
 			yyVAL.values = []ast.AST{yyDollar[1].ast}
 		}
 	case 23:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line grammer.y:124
+		//line grammer.y:117
 		{
 			size := len(yyDollar[3].values) + 1
 			values := make([]ast.AST, size, size)
@@ -627,7 +627,7 @@ yydefault:
 		}
 	case 24:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line grammer.y:134
+		//line grammer.y:126
 		{
 			yyVAL.ast = &ast.NumberTemplateNode{Id: yyDollar[2].token.literal}
 		}
