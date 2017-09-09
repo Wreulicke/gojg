@@ -44,10 +44,10 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		}
 	} else if token == scanner.String {
 		token = STRING
-		if strings.HasPrefix(text, "{{{") && strings.HasSuffix(text, "}}}") {
-			text = text[3 : len(text)-3]
+		text = text[1 : len(text)-1]
+		if strings.HasPrefix(text, "{{") && strings.HasSuffix(text, "}}") {
+			text = text[2 : len(text)-2]
 			token = STRING_TEMPLATE
-		} else {
 		}
 	} else if ruNe == '{' {
 		if l.Peek() == '{' {

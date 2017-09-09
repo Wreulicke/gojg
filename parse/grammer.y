@@ -12,7 +12,7 @@ import "github.com/wreulicke/gojg/ast"
 }
 
 %type<ast> json_template value boolean_template number_template array object
-%type<token> stirngOrTemplate
+%type<ast> stringOrTemplate
 %type<values> elements members
 %token<token> NUMBER
 %token<token> FALSE
@@ -55,17 +55,16 @@ value:
     | array {
         $$ = $1
     }
-    | stirngOrTemplate {
-        text := $1.literal
-        $$ = &ast.ValueNode{Value: text[1:len(text)-1]}
+    | stringOrTemplate {
+        $$ = $1
     }
 
-stirngOrTemplate: STRING 
+stringOrTemplate: STRING 
     {
-        $$ = $1
+        $$ = &ast.ValueNode{Value: $1.literal}
     }
     | STRING_TEMPLATE {
-        $$ = $1
+        $$ = &ast.ValueNode{Id: $1.literal}
     }
 
 boolean_template: BOOLEAN_PREFIX "(" ID ")" 
@@ -78,19 +77,19 @@ object:
         $$ = &ast.ObjectNode{Members: []ast.AST{}}
     }
     |
-    "{" members"}" 
+    "{" members "}" 
     {
         $$ = &ast.ObjectNode{Members: $2}
     }
 
 members: 
-    stirngOrTemplate ":" value {
-        $$ = []ast.AST{&ast.MemberNode{Name: $1.literal, Value: $3}}
+    stringOrTemplate ":" value {
+        $$ = []ast.AST{&ast.MemberNode{Name: $1, Value: $3}}
     }
-    | stirngOrTemplate ":" value "," members {
+    | stringOrTemplate ":" value "," members {
         size := len($5)+1
         values := make([]ast.AST, size, size)
-        values = append(values, &ast.MemberNode{Name: $1.literal, Value: $3})
+        values = append(values, &ast.MemberNode{Name: $1, Value: $3})
         values = append(values, $5...)
         $$ = values
     }

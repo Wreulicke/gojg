@@ -14,7 +14,7 @@ type ValueNode struct {
 }
 
 type MemberNode struct {
-	Name  string
+	Name  AST
 	Value AST
 }
 
