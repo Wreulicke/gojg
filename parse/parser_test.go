@@ -45,6 +45,34 @@ func TestParseNumber(t *testing.T) {
 	mustParse(t, "4.5")
 }
 
+func TestParseArray(t *testing.T) {
+	mustParse(t, "[]")
+	mustParse(t, `["test", 1]`)
+	mustParse(t, "[1, {{test}}]")
+	mustParse(t, "[{{test}}, -1]")
+	mustParse(t, `["{{test}}"]`)
+}
+
+func TestParseObject(t *testing.T) {
+	mustParse(t, `{}`)
+	mustParse(t, `{"test": 1}`)
+	mustParse(t, `{"test": -1}`)
+	mustParse(t, `{"test": {{test}}}`)
+	mustParse(t, `{"test": "{{test}}"}`)
+	mustParse(t, `{"{{xxx}}": "{{test}}"}`)
+	mustParse(t, `{"test": [
+		1,
+		-1,
+		3.5,
+		{{test}},
+		"test",
+		"{{test}}",
+		true,
+		false,
+		null,
+		bool(test)
+	]}`)
+}
 func mustParse(t *testing.T, src string) ast.AST {
 	r, err := Parse(src)
 	if err != nil {
