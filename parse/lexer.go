@@ -24,6 +24,7 @@ func (l *Lexer) Error(e string) {
 	l.error = errors.New(e)
 }
 
+// Create Lexer
 func (l *Lexer) Lex(lval *yySymType) int {
 	ruNe := l.Scan()
 	token := int(ruNe)
