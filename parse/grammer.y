@@ -19,8 +19,12 @@ import "github.com/wreulicke/gojg/ast"
 %token<token> FALSE
 %token<token> NULL
 %token<token> TRUE
+%token<token> COLON COMMA
 %token<token> STRING STRING_TEMPLATE
 %token<token> TEMPLATE_BEGIN TEMPLATE_END
+%token<token> OBJECT_BEGIN OBJECT_END
+%token<token> BRACE_BEGIN BRACE_END
+%token<token> ARRAY_BEGIN ARRAY_END
 %token<> BOOLEAN_PREFIX
 %token<token> ID
 
@@ -82,24 +86,24 @@ number_template:
     }
 
 boolean_template: 
-    BOOLEAN_PREFIX "(" ID ")" { 
+    BOOLEAN_PREFIX BRACE_BEGIN ID BRACE_END { 
         $$ = &ast.BoolTemplateNode{Id: $3.literal}
     }
 
 object: 
-    "{" "}" {
+    OBJECT_BEGIN OBJECT_END  {
         $$ = &ast.ObjectNode{Members: []ast.AST{}}
     }
     |
-    "{" members "}" {
+    OBJECT_BEGIN members OBJECT_END {
         $$ = &ast.ObjectNode{Members: $2}
     }
 
 members: 
-    string_or_template ":" value {
+    string_or_template COLON value {
         $$ = []ast.AST{&ast.MemberNode{Name: $1, Value: $3}}
     }
-    | string_or_template ":" value "," members {
+    | string_or_template COLON value COMMA members {
         size := len($5)+1
         values := make([]ast.AST, size, size)
         values = append(values, &ast.MemberNode{Name: $1, Value: $3})
@@ -108,10 +112,10 @@ members:
     }
 
 array: 
-    "[" "]" {
+    ARRAY_BEGIN ARRAY_END {
         $$ = &ast.ArrayNode{Value: []ast.AST{}}
     }
-    | "[" elements "]" {
+    | ARRAY_BEGIN elements ARRAY_END {
         $$ = &ast.ArrayNode{Value: $2}
     }
 
@@ -119,7 +123,7 @@ elements:
     value { 
         $$ = []ast.AST{$1}
     }
-    | value "," elements {   
+    | value COMMA elements {   
         size := len($3)+1
         values := make([]ast.AST, size, size)
         values = append(values, $1)

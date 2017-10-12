@@ -1,9 +1,14 @@
 package parse
 
 import (
+	"bufio"
+	"bytes"
 	"errors"
+	"fmt"
+	"io"
 	"strings"
-	"text/scanner"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/wreulicke/gojg/ast"
 )
@@ -14,9 +19,17 @@ type Token struct {
 }
 
 type Lexer struct {
-	scanner.Scanner
+	input  *bufio.Reader
+	buffer bytes.Buffer
+	pos    int
 	result ast.AST
 	error  error
+}
+
+const eof = -1
+
+func (l *Lexer) Init(reader io.Reader) {
+	l.input = bufio.NewReader(reader)
 }
 
 //go:generate goyacc -o grammer.go grammer.y
@@ -24,45 +37,248 @@ func (l *Lexer) Error(e string) {
 	l.error = errors.New(e)
 }
 
-// Create Lexer
-func (l *Lexer) Lex(lval *yySymType) int {
-	ruNe := l.Scan()
-	token := int(ruNe)
-	text := l.TokenText()
-	if token == scanner.Int || token == scanner.Float {
-		token = NUMBER
-	} else if token == scanner.Ident {
-		if text == "bool" {
-			token = BOOLEAN_PREFIX
-		} else if text == "false" {
-			token = FALSE
-		} else if text == "null" {
-			token = NULL
-		} else if text == "true" {
-			token = TRUE
-		} else {
-			token = ID
-		}
-	} else if token == scanner.String {
-		token = STRING
-		text = text[1 : len(text)-1]
-		if strings.HasPrefix(text, "{{") && strings.HasSuffix(text, "}}") {
-			text = text[2 : len(text)-2]
-			token = STRING_TEMPLATE
-		}
-	} else if ruNe == '{' {
-		if l.Peek() == '{' {
+func (l *Lexer) scanDigit(next rune) {
+	if next == '0' {
+		l.Error("unexpected digit '0'")
+		return
+	} else if isDigit(next) {
+		next := l.Peek()
+		for {
+			if !isDigit(next) {
+				break
+			}
 			l.Next()
-			token = TEMPLATE_BEGIN
+			next = l.Peek()
 		}
-	} else if ruNe == '}' {
-		if l.Peek() == '}' {
+		next = l.Peek()
+		if next == '.' {
 			l.Next()
-			token = TEMPLATE_END
+			next = l.Peek()
+			for {
+				if !isDigit(next) {
+					break
+				}
+				l.Next()
+				next = l.Peek()
+			}
 		}
-	} else if ruNe == '-' {
-		token = MINUS
+		next = l.Peek()
+		if next == 'e' || next == 'E' {
+			l.Next()
+			next := l.Peek()
+			if next == '+' || next == '-' {
+				l.Next()
+			}
+			next = l.Peek()
+			if !isDigit(next) {
+				l.Error("digit expected for number exponent")
+			}
+			l.Next()
+			next = l.Peek()
+			for {
+				if !isDigit(next) {
+					break
+				}
+				l.Next()
+				next = l.Peek()
+			}
+		}
+	} else {
+		l.Error("error")
+		return
 	}
-	lval.token = Token{typ: token, literal: text}
-	return token
+}
+
+func isIdentifierPart(r rune) bool {
+	return (unicode.IsLetter(r) || unicode.IsMark(r) || unicode.IsDigit(r) ||
+		unicode.IsPunct(r)) && !strings.ContainsRune("{}[]():,", r)
+}
+
+func (l *Lexer) scanIdentifier() {
+	next := l.Peek()
+	if unicode.IsLetter(next) || next == '$' || next == '_' {
+	} else {
+		l.Error("expected identifier")
+	}
+
+	for next = l.Peek(); isIdentifierPart(next); {
+		l.Next()
+		text := l.buffer.String()
+		if text == "bool" {
+			return
+		}
+		next = l.Peek()
+	}
+}
+
+func (l *Lexer) scanString() {
+	for {
+		switch next := l.Next(); {
+		case next == '"':
+			return
+		case next == '\\':
+			if strings.IndexRune(`"\/bfnrt`, l.Peek()) >= 0 {
+				l.Next()
+				break
+			} else if r := l.Next(); r == 'u' {
+				for i := 0; i < 4; i++ {
+					if strings.IndexRune("0123456789ABDEFabcdef", l.Peek()) >= 0 {
+						l.Next()
+					} else {
+						l.Error("expected 4 hexadecimal digits")
+						return
+					}
+				}
+			} else {
+				l.Error("unsupported escape character")
+				return
+			}
+		case unicode.IsControl(next):
+			l.Error("cannot contain control characters in strings")
+			return
+		case next == eof:
+			l.Error("unclosed string")
+			return
+		}
+	}
+}
+
+func (l *Lexer) scanWhitespace() {
+	ruNe := l.Peek()
+	for unicode.IsSpace(ruNe) {
+		l.Next()
+		ruNe = l.Peek()
+	}
+	return
+}
+
+func isDigit(ch rune) bool {
+	return '0' <= ch && ch <= '9'
+}
+
+func (l *Lexer) TokenText() string {
+	return l.buffer.String()
+}
+
+func (l *Lexer) Scan() int {
+retry:
+	switch next := l.Next(); {
+	case next == '"':
+		l.scanString()
+		text := l.TokenText()
+		if len(text) < 2 {
+			l.Error("expected 1 or more character")
+		}
+		if strings.HasPrefix(text, `"{{`) && strings.HasSuffix(text, `}}"`) {
+			l.buffer.Reset()
+			l.buffer.WriteString(text[3 : len(text)-3])
+			return STRING_TEMPLATE
+		}
+		return STRING
+	case next == ',':
+		return COMMA
+	case next == ':':
+		return COLON
+	case next == '[':
+		return ARRAY_BEGIN
+	case next == ']':
+		return ARRAY_END
+	case next == '{':
+		r := l.Peek()
+		if r == '{' {
+			l.Next()
+			return TEMPLATE_BEGIN
+		}
+		return OBJECT_BEGIN
+	case next == '}':
+		r := l.Peek()
+		if r == '}' {
+			l.Next()
+			return TEMPLATE_END
+		}
+		return OBJECT_END
+	case next == '(':
+		return BRACE_BEGIN
+	case next == ')':
+		return BRACE_END
+	case next == '-':
+		return MINUS
+	default:
+		if unicode.IsSpace(next) {
+			l.scanWhitespace()
+			l.buffer.Reset()
+			goto retry
+		} else if next == eof {
+			return eof
+		} else if isDigit(next) {
+			l.scanDigit(next)
+			return NUMBER
+		}
+		l.scanIdentifier()
+		text := l.TokenText()
+		if text == "bool" {
+			return BOOLEAN_PREFIX
+		} else if text == "false" {
+			return FALSE
+		} else if text == "null" {
+			return NULL
+		} else if text == "true" {
+			return TRUE
+		}
+		return ID
+	}
+}
+
+func (l *Lexer) Next() rune {
+	r, w, err := l.input.ReadRune()
+	if err == io.EOF {
+		return eof
+	}
+	l.pos += w
+	l.buffer.WriteRune(r)
+	return r
+}
+
+func (l *Lexer) Peek() rune {
+	lead, err := l.input.Peek(1)
+
+	if err == io.EOF {
+		return eof
+	} else if err != nil {
+		l.Error("unexpected input error")
+		return 0
+	}
+
+	p, err := l.input.Peek(runeLen(lead[0]))
+
+	if err == io.EOF {
+		return eof
+	} else if err != nil {
+		l.Error("unexpected input error")
+		return 0
+	}
+
+	ruNe, _ := utf8.DecodeRune(p)
+	return ruNe
+}
+
+func runeLen(lead byte) int {
+	if lead < 0xC0 {
+		return 1
+	} else if lead < 0xE0 {
+		return 2
+	} else if lead < 0xF0 {
+		return 3
+	}
+	return 4
+}
+
+// Lex Create Lexer
+func (l *Lexer) Lex(lval *yySymType) int {
+	typ := l.Scan()
+	text := l.TokenText()
+	lval.token = Token{typ: typ, literal: text}
+	l.buffer.Reset()
+	fmt.Println(text)
+	return typ
 }

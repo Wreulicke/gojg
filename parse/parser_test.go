@@ -8,7 +8,7 @@ import (
 )
 
 func TestParseString(t *testing.T) {
-	r := mustParse(t, `"test"`)
+	r, _ := mustParse(t, `"test"`)
 	if v, ok := r.(*ast.ValueNode); ok {
 		t.Logf("value: %s", v)
 	} else {
@@ -17,7 +17,7 @@ func TestParseString(t *testing.T) {
 }
 
 func TestParseStringTemplate(t *testing.T) {
-	r := mustParse(t, `"{{test}}"`)
+	r, _ := mustParse(t, `"{{test}}"`)
 	if v, ok := r.(*ast.ValueNode); ok { // TODO more fluent type
 		t.Logf("value: %s", v)
 		if v.Id != "test" {
@@ -73,12 +73,14 @@ func TestParseObject(t *testing.T) {
 		bool(test)
 	]}`)
 }
-func mustParse(t *testing.T, src string) ast.AST {
+
+func mustParse(t *testing.T, src string) (ast.AST, error) {
 	r, err := Parse(src)
 	if err != nil {
-		t.Fatalf("error: %s, src:%s", err, src)
+		t.Errorf("error: %s, src:%s", err, src)
+		return nil, err
 	}
-	return r
+	return r, err
 }
 
 func getTypeName(o interface{}) string {
