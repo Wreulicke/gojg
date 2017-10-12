@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"strings"
 	"unicode"
@@ -279,6 +278,5 @@ func (l *Lexer) Lex(lval *yySymType) int {
 	text := l.TokenText()
 	lval.token = Token{typ: typ, literal: text}
 	l.buffer.Reset()
-	fmt.Println(text)
 	return typ
 }
