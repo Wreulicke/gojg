@@ -11,7 +11,7 @@ import "github.com/wreulicke/gojg/ast"
     token Token
 }
 
-%type<ast> json_template value boolean_template number_template array object
+%type<ast> json_template value boolean_template raw_value_template array object
 %type<ast> string_or_template number_literal
 %type<values> elements members
 %token<token> MINUS 
@@ -51,6 +51,9 @@ value:
     | number_literal {
         $$ = $1
     }
+    | raw_value_template {
+        $$ = $1
+    }
     | object  {
         $$ = $1
     }
@@ -75,18 +78,15 @@ number_literal:
         num := lex.parseFloat($1.literal + $2.literal)
         $$ = &ast.NumberNode{Value: num}
     }
-    | number_template {
-        $$ = $1
-    }
     | NUMBER {
         lex := yylex.(*Lexer)
         num := lex.parseFloat($1.literal)
         $$ = &ast.NumberNode{Value: num}
     }
 
-number_template: 
+raw_value_template: 
     TEMPLATE_BEGIN ID TEMPLATE_END {
-        $$ = &ast.NumberNode{ID: &ast.ID{$2.literal}}
+        $$ = &ast.RawValueTemplateNode{ID: &ast.ID{$2.literal}}
     }
 
 boolean_template: 

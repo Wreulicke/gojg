@@ -79,50 +79,50 @@ const yyLast = 59
 
 var yyAct = [...]int{
 
-	10, 23, 26, 27, 2, 29, 12, 14, 4, 5,
-	6, 28, 32, 17, 18, 19, 24, 15, 35, 17,
-	18, 16, 25, 11, 22, 38, 20, 30, 34, 17,
-	18, 33, 31, 21, 7, 36, 37, 8, 9, 24,
-	39, 12, 14, 4, 5, 6, 13, 3, 17, 18,
-	19, 1, 15, 0, 0, 0, 16, 0, 11,
+	11, 24, 27, 28, 2, 13, 14, 4, 5, 6,
+	29, 22, 18, 19, 15, 33, 16, 25, 35, 20,
+	17, 26, 12, 18, 19, 31, 38, 30, 23, 18,
+	19, 34, 32, 21, 7, 9, 36, 37, 10, 25,
+	39, 13, 14, 4, 5, 6, 8, 3, 18, 19,
+	15, 1, 16, 0, 0, 0, 17, 0, 12,
 }
 var yyPact = [...]int{
 
 	37, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
-	-1000, 9, 28, -1000, -1000, 8, 2, -1000, -1000, -11,
-	-17, -1000, -1000, 11, 23, -1000, -8, 21, 14, 0,
-	-1000, 37, -1000, 37, -1000, -1000, 15, -1000, 18, -1000,
+	-1000, -1000, 2, 28, -1000, -11, 12, 1, -1000, -1000,
+	-12, -1000, 13, -1000, 9, 23, -1000, -5, 21, 0,
+	-1000, -1000, 37, -1000, 37, -1000, 16, -1000, 18, -1000,
 }
 var yyPgo = [...]int{
 
-	0, 51, 3, 47, 46, 38, 37, 0, 34, 2,
+	0, 51, 3, 47, 46, 38, 35, 0, 34, 2,
 	1,
 }
 var yyR1 = [...]int{
 
 	0, 1, 2, 2, 2, 2, 2, 2, 2, 2,
-	7, 7, 8, 8, 8, 4, 3, 6, 6, 10,
+	2, 7, 7, 8, 8, 4, 3, 6, 6, 10,
 	10, 5, 5, 9, 9,
 }
 var yyR2 = [...]int{
 
 	0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 2, 1, 1, 3, 4, 2, 3, 3,
+	1, 1, 1, 2, 1, 3, 4, 2, 3, 3,
 	5, 2, 3, 1, 3,
 }
 var yyChk = [...]int{
 
-	-1000, -1, -2, -3, 6, 7, 8, -8, -6, -5,
-	-7, 21, 4, -4, 5, 15, 19, 11, 12, 13,
-	17, 5, 16, -10, -7, 20, -9, -2, 22, 22,
-	16, 9, 20, 10, 14, 18, -2, -9, 10, -10,
+	-1000, -1, -2, -3, 6, 7, 8, -8, -4, -6,
+	-5, -7, 21, 4, 5, 13, 15, 19, 11, 12,
+	17, 5, 22, 16, -10, -7, 20, -9, -2, 22,
+	14, 16, 9, 20, 10, 18, -2, -9, 10, -10,
 }
 var yyDef = [...]int{
 
 	0, -2, 1, 2, 3, 4, 5, 6, 7, 8,
-	9, 0, 0, 13, 14, 0, 0, 10, 11, 0,
-	0, 12, 17, 0, 0, 21, 0, 23, 0, 0,
-	18, 0, 22, 0, 15, 16, 19, 24, 0, 20,
+	9, 10, 0, 0, 14, 0, 0, 0, 11, 12,
+	0, 13, 0, 17, 0, 0, 21, 0, 23, 0,
+	15, 18, 0, 22, 0, 16, 19, 24, 0, 20,
 }
 var yyTok1 = [...]int{
 
@@ -532,29 +532,29 @@ yydefault:
 		}
 	case 10:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line grammer.y:65
+		//line grammer.y:63
 		{
-			yyVAL.ast = &ast.StringNode{Value: yyDollar[1].token.literal}
+			yyVAL.ast = yyDollar[1].ast
 		}
 	case 11:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		//line grammer.y:68
 		{
-			yyVAL.ast = &ast.StringNode{ID: &ast.ID{yyDollar[1].token.literal}}
+			yyVAL.ast = &ast.StringNode{Value: yyDollar[1].token.literal}
 		}
 	case 12:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		//line grammer.y:71
+		{
+			yyVAL.ast = &ast.StringNode{ID: &ast.ID{yyDollar[1].token.literal}}
+		}
+	case 13:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line grammer.y:73
+		//line grammer.y:76
 		{
 			lex := yylex.(*Lexer)
 			num := lex.parseFloat(yyDollar[1].token.literal + yyDollar[2].token.literal)
 			yyVAL.ast = &ast.NumberNode{Value: num}
-		}
-	case 13:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line grammer.y:78
-		{
-			yyVAL.ast = yyDollar[1].ast
 		}
 	case 14:
 		yyDollar = yyS[yypt-1 : yypt+1]
@@ -568,7 +568,7 @@ yydefault:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		//line grammer.y:88
 		{
-			yyVAL.ast = &ast.NumberNode{ID: &ast.ID{yyDollar[2].token.literal}}
+			yyVAL.ast = &ast.RawValueTemplateNode{ID: &ast.ID{yyDollar[2].token.literal}}
 		}
 	case 16:
 		yyDollar = yyS[yypt-4 : yypt+1]
