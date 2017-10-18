@@ -45,7 +45,7 @@ func (l *Lexer) Init(reader io.Reader) {
 
 //go:generate goyacc -o grammer.go grammer.y
 func (l *Lexer) Error(e string) {
-	error := &Error{e: errors.New(e), position: l.position}
+	error := &Error{e: errors.New(e), position: &(*l.position)}
 	l.error = error
 }
 
@@ -75,6 +75,10 @@ func (l *Lexer) scanDigit(next rune) {
 		if next == '.' {
 			l.Next()
 			next = l.Peek()
+			if !isDigit(next) {
+				l.Error("unexpected token: expected digits")
+				return
+			}
 			for {
 				if !isDigit(next) {
 					break
@@ -268,7 +272,6 @@ func (l *Lexer) Next() rune {
 
 func (l *Lexer) Peek() rune {
 	lead, err := l.input.Peek(1)
-
 	if err == io.EOF {
 		return eof
 	} else if err != nil {
@@ -302,6 +305,9 @@ func runeLen(lead byte) int {
 
 // Lex Create Lexer
 func (l *Lexer) Lex(lval *yySymType) int {
+	if l.error != nil {
+		return -1
+	}
 	typ := l.Scan()
 	text := l.TokenText()
 	lval.token = Token{typ: typ, literal: text}

@@ -36,8 +36,8 @@ func TestParseNumber(t *testing.T) {
 	mustParse(t, "1")
 	mustParse(t, "-1")
 	mustParse(t, "4.5")
-	v, e := mustFailToParse(t, "[5, 4..5]")
-	t.Log(v, e)
+	mustFailToParse(t, "[5, 4.]")
+	mustFailToParse(t, "[5, 4..5]")
 }
 
 func TestParseArray(t *testing.T) {
