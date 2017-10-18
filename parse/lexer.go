@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -17,23 +18,47 @@ type Token struct {
 	literal string
 }
 
+type Position struct {
+	line   int
+	column int
+}
+
+type Error struct {
+	e        error
+	position *Position
+}
 type Lexer struct {
-	input  *bufio.Reader
-	buffer bytes.Buffer
-	pos    int
-	result ast.AST
-	error  error
+	input    *bufio.Reader
+	buffer   bytes.Buffer
+	position *Position
+	offset   int
+	result   ast.AST
+	error    *Error
 }
 
 const eof = -1
 
 func (l *Lexer) Init(reader io.Reader) {
 	l.input = bufio.NewReader(reader)
+	pos := new(Position)
+	l.position = pos
 }
 
 //go:generate goyacc -o grammer.go grammer.y
 func (l *Lexer) Error(e string) {
-	l.error = errors.New(e)
+	error := new(Error)
+	error.e = errors.New(e)
+	error.position = l.position
+	l.error = error
+}
+
+func (l *Lexer) parseFloat(str string) float64 {
+	f64, err := strconv.ParseFloat(str, 64)
+	if err != nil {
+		l.Error("unexpected number format error")
+		return -1
+	}
+	return f64
 }
 
 func (l *Lexer) scanDigit(next rune) {
@@ -173,6 +198,8 @@ retry:
 			l.buffer.WriteString(text[3 : len(text)-3])
 			return STRING_TEMPLATE
 		}
+		l.buffer.Reset()
+		l.buffer.WriteString(text[1 : len(text)-1])
 		return STRING
 	case next == ',':
 		return COMMA
@@ -233,7 +260,12 @@ func (l *Lexer) Next() rune {
 	if err == io.EOF {
 		return eof
 	}
-	l.pos += w
+	if r == '\n' {
+		pos := new(Position)
+		pos.line = l.position.line + 1
+		pos.column = 0
+	}
+	l.offset += w
 	l.buffer.WriteRune(r)
 	return r
 }

@@ -40,13 +40,13 @@ value:
         $$ = $1
     }
     | FALSE {
-        $$ = &ast.ValueNode{Value: false}
+        $$ = &ast.BooleanNode{Value: false}
     }
     | NULL {
-        $$ = &ast.ValueNode{Value: nil}
+        $$ = &ast.NullNode{}
     }
     | TRUE {
-        $$ = &ast.ValueNode{Value: true}
+        $$ = &ast.BooleanNode{Value: true}
     }
     | number_literal {
         $$ = $1
@@ -63,31 +63,35 @@ value:
 
 string_or_template: 
     STRING {
-        $$ = &ast.ValueNode{Value: $1.literal}
+        $$ = &ast.StringNode{Value: $1.literal}
     }
     | STRING_TEMPLATE {
-        $$ = &ast.ValueNode{Id: $1.literal}
+        $$ = &ast.StringNode{ID: &ast.ID{$1.literal}}
     }
 
 number_literal: 
     MINUS NUMBER {
-        $$ = &ast.ValueNode{Value: $1.literal + $2.literal}
+        lex := yylex.(*Lexer)
+        num := lex.parseFloat($1.literal + $2.literal)
+        $$ = &ast.NumberNode{Value: num}
     }
     | number_template {
         $$ = $1
     }
     | NUMBER {
-        $$ = &ast.ValueNode{Value: $1.literal}
+        lex := yylex.(*Lexer)
+        num := lex.parseFloat($1.literal)
+        $$ = &ast.NumberNode{Value: num}
     }
 
 number_template: 
     TEMPLATE_BEGIN ID TEMPLATE_END {
-        $$ = &ast.NumberTemplateNode{Id: $2.literal}
+        $$ = &ast.NumberNode{ID: &ast.ID{$2.literal}}
     }
 
 boolean_template: 
     BOOLEAN_PREFIX BRACE_BEGIN ID BRACE_END { 
-        $$ = &ast.BoolTemplateNode{Id: $3.literal}
+        $$ = &ast.BooleanNode{ID: &ast.ID{$3.literal}}
     }
 
 object: 

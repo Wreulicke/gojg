@@ -1,31 +1,24 @@
 package parse
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/wreulicke/gojg/ast"
 )
 
-func TestParseString(t *testing.T) {
-	r, _ := mustParse(t, `"test"`)
-	if v, ok := r.(*ast.ValueNode); ok {
-		t.Logf("value: %s", v)
-	} else {
-		t.Fatalf("%s(type: %s) is not value node", r, getTypeName(r))
-	}
+type result struct {
+	t *testing.T
+	v ast.AST
+	e *Error
 }
 
-func TestParseStringTemplate(t *testing.T) {
-	r, _ := mustParse(t, `"{{test}}"`)
-	if v, ok := r.(*ast.ValueNode); ok { // TODO more fluent type
-		t.Logf("value: %s", v)
-		if v.Id != "test" {
-			t.Fatalf("expected: test, actual %s", v.Id)
-		}
-	} else {
-		t.Fatalf("%s(type: %s) is not value node", r, getTypeName(r))
-	}
+func TestParseString(t *testing.T) {
+	mustParse(t, `"test"`)
+	mustParse(t, `"{{test}}"`)
+}
+
+func TestParseStringWithFailure(t *testing.T) {
+	mustFailToParse(t, `"test`)
 }
 
 func TestParseBool(t *testing.T) {
@@ -43,6 +36,7 @@ func TestParseNumber(t *testing.T) {
 	mustParse(t, "1")
 	mustParse(t, "-1")
 	mustParse(t, "4.5")
+	mustFailToParse(t, "4..5")
 }
 
 func TestParseArray(t *testing.T) {
@@ -58,6 +52,7 @@ func TestParseObject(t *testing.T) {
 	mustParse(t, `{"test": 1}`)
 	mustParse(t, `{"test": -1}`)
 	mustParse(t, `{"test": {{test}}}`)
+	mustParse(t, `{"test": bool(test)}`)
 	mustParse(t, `{"test": "{{test}}"}`)
 	mustParse(t, `{"{{xxx}}": "{{test}}"}`)
 	mustParse(t, `{"test": [
@@ -74,19 +69,20 @@ func TestParseObject(t *testing.T) {
 	]}`)
 }
 
-func mustParse(t *testing.T, src string) (ast.AST, error) {
+func mustFailToParse(t *testing.T, src string) (ast.AST, *Error) {
 	r, err := Parse(src)
 	if err != nil {
-		t.Errorf("error: %s, src:%s", err, src)
-		return nil, err
+		return r, err
 	}
+	t.Errorf("unexpected to parse successfully. result: %v, src: %s", r, src)
 	return r, err
 }
 
-func getTypeName(o interface{}) string {
-	t := reflect.TypeOf(o)
-	if t.Kind() == reflect.Ptr {
-		return "*" + t.Elem().Name()
+func mustParse(t *testing.T, src string) result {
+	r, err := Parse(src)
+	if err != nil {
+		t.Errorf("error: %v, src: %s", err, src)
+		return result{e: err}
 	}
-	return t.Name()
+	return result{t: t, v: r, e: nil}
 }

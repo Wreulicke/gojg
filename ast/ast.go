@@ -1,16 +1,25 @@
 package ast
 
-type BoolTemplateNode struct {
-	Id string
+type NumberNode struct {
+	ID    *ID
+	Raw   string
+	Value float64
 }
 
-type NumberTemplateNode struct {
-	Id string
+type StringNode struct {
+	Value string
+	ID    *ID
 }
 
-type ValueNode struct {
-	Value interface{}
-	Id    string
+type BooleanNode struct {
+	Value bool
+	ID    *ID
+}
+
+type NullNode struct{}
+
+type ID struct {
+	Name string
 }
 
 type MemberNode struct {

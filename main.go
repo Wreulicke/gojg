@@ -26,7 +26,7 @@ func main() {
 	]`)
 	ast, _ := parse.Parse("false")
 	switch t := ast.(type) {
-	case *Ast.ValueNode:
+	case *Ast.BooleanNode:
 		if t.Value == false {
 			fmt.Println("5000兆円欲しい")
 		} else {
