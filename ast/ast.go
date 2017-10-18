@@ -1,9 +1,12 @@
 package ast
 
 type NumberNode struct {
-	ID    *ID
 	Raw   string
 	Value float64
+}
+
+type RawValueTemplateNode struct {
+	ID *ID
 }
 
 type StringNode struct {
