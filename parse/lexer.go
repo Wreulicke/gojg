@@ -40,15 +40,12 @@ const eof = -1
 
 func (l *Lexer) Init(reader io.Reader) {
 	l.input = bufio.NewReader(reader)
-	pos := new(Position)
-	l.position = pos
+	l.position = &Position{}
 }
 
 //go:generate goyacc -o grammer.go grammer.y
 func (l *Lexer) Error(e string) {
-	error := new(Error)
-	error.e = errors.New(e)
-	error.position = l.position
+	error := &Error{e: errors.New(e), position: l.position}
 	l.error = error
 }
 
@@ -261,10 +258,9 @@ func (l *Lexer) Next() rune {
 		return eof
 	}
 	if r == '\n' {
-		pos := new(Position)
-		pos.line = l.position.line + 1
-		pos.column = 0
+		l.position = &Position{line: l.position.line + 1}
 	}
+	l.position.column += w
 	l.offset += w
 	l.buffer.WriteRune(r)
 	return r
