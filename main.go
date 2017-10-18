@@ -1,36 +1,22 @@
 package main
 
 import (
-	"fmt"
+	"bufio"
+	"os"
 
-	Ast "github.com/wreulicke/gojg/ast"
+	"github.com/wreulicke/gojg/generator"
 	"github.com/wreulicke/gojg/parse"
 )
 
 func main() {
-	parse.Parse("bool(test)")
-	parse.Parse("true")
-	parse.Parse("false")
-	parse.Parse("null")
-	parse.Parse(`"test"`)
-	parse.Parse("{{test}}")
-	parse.Parse(`"{{test}}"`)
-	parse.Parse(`{}`)
-	parse.Parse("[{{test}}]")
-	parse.Parse(`[
-		{{test}},
-		"{{test}}",
-		"test",
-		2,
-		3.5
-	]`)
-	ast, _ := parse.Parse("false")
-	switch t := ast.(type) {
-	case *Ast.BooleanNode:
-		if t.Value == false {
-			fmt.Println("5000兆円欲しい")
-		} else {
-			fmt.Println("test")
-		}
+	ast, e := parse.Parse("true")
+	if e != nil {
+		return
 	}
+	writer := bufio.NewWriter(os.Stdout)
+	err := generator.Generate(ast, writer)
+	if err != nil {
+		return
+	}
+	writer.Flush()
 }
