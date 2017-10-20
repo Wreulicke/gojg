@@ -109,7 +109,7 @@ members:
     }
     | string_or_template COLON value COMMA members {
         size := len($5)+1
-        values := make([]ast.AST, size, size)
+        values := make([]ast.AST, 0, size)
         values = append(values, &ast.MemberNode{Name: $1, Value: $3})
         values = append(values, $5...)
         $$ = values
@@ -129,7 +129,7 @@ elements:
     }
     | value COMMA elements {   
         size := len($3)+1
-        values := make([]ast.AST, size, size)
+        values := make([]ast.AST, 0, size)
         values = append(values, $1)
         values = append(values, $3...)
         $$ = values

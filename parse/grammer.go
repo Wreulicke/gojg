@@ -599,7 +599,7 @@ yydefault:
 		//line grammer.y:110
 		{
 			size := len(yyDollar[5].values) + 1
-			values := make([]ast.AST, size, size)
+			values := make([]ast.AST, 0, size)
 			values = append(values, &ast.MemberNode{Name: yyDollar[1].ast, Value: yyDollar[3].ast})
 			values = append(values, yyDollar[5].values...)
 			yyVAL.values = values
@@ -627,7 +627,7 @@ yydefault:
 		//line grammer.y:130
 		{
 			size := len(yyDollar[3].values) + 1
-			values := make([]ast.AST, size, size)
+			values := make([]ast.AST, 0, size)
 			values = append(values, yyDollar[1].ast)
 			values = append(values, yyDollar[3].values...)
 			yyVAL.values = values
