@@ -11,7 +11,7 @@ jobs:
     steps:
       - checkout
       - run: mkdir -p $TEST_RESULTS
-      - run: make preinstall
+      - run: make preinstall install
       - run: make lint
       - run: make build
       - run: 
