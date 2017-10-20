@@ -48,7 +48,20 @@ func writeString(writer *bufio.Writer, node *ast.StringNode) error {
 		fmt.Println("not implemented")
 		return errors.New("not implemented")
 	}
-	_, err := writer.WriteString(node.Value)
+
+	var err error
+	if _, err = writer.WriteRune('"'); err != nil {
+		return err
+	}
+
+	if _, err = writer.WriteString(node.Value); err != nil {
+		return err
+	}
+
+	if _, err = writer.WriteRune('"'); err != nil {
+		return err
+	}
+
 	return err
 }
 
@@ -93,12 +106,12 @@ func writeObject(writer *bufio.Writer, node *ast.ObjectNode) error {
 		if err != nil {
 			return err
 		}
-		for v := range node.Members[1:] {
+		for _, v := range node.Members[1:] {
 			_, err := writer.WriteRune(',')
 			if err != nil {
 				return err
 			}
-			err = Generate(v, writer)
+			err = writeMember(writer, v)
 			if err != nil {
 				return err
 			}
