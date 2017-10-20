@@ -19,4 +19,6 @@
     - [x] Nothing in my roadmap (~~from stdin~~)
 - [ ] Support JSON5 format
 - [ ] Make more friendly message
+- [ ] Implement Verbose parser.
+    - [ ] refacotr lexer using channel?
 - [ ] Release
