@@ -1,6 +1,8 @@
 package parse
 
 import (
+	"bufio"
+	"strings"
 	"testing"
 
 	"github.com/wreulicke/gojg/ast"
@@ -9,7 +11,7 @@ import (
 type result struct {
 	t *testing.T
 	v ast.AST
-	e *Error
+	e error
 }
 
 func TestParseString(t *testing.T) {
@@ -70,8 +72,9 @@ func TestParseObject(t *testing.T) {
 	]}`)
 }
 
-func mustFailToParse(t *testing.T, src string) (ast.AST, *Error) {
-	r, err := Parse(src)
+func mustFailToParse(t *testing.T, src string) (ast.AST, error) {
+	reader := bufio.NewReader(strings.NewReader(src))
+	r, err := Parse(reader)
 	if err != nil {
 		return r, err
 	}
@@ -80,7 +83,8 @@ func mustFailToParse(t *testing.T, src string) (ast.AST, *Error) {
 }
 
 func mustParse(t *testing.T, src string) result {
-	r, err := Parse(src)
+	reader := bufio.NewReader(strings.NewReader(src))
+	r, err := Parse(reader)
 	if err != nil {
 		t.Errorf("error: %v, src: %s", err, src)
 		return result{e: err}

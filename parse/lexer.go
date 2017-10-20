@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"strconv"
 	"strings"
@@ -23,17 +24,13 @@ type Position struct {
 	column int
 }
 
-type Error struct {
-	e        error
-	position *Position
-}
 type Lexer struct {
 	input    *bufio.Reader
 	buffer   bytes.Buffer
 	position *Position
 	offset   int
 	result   ast.AST
-	error    *Error
+	error    error
 }
 
 const eof = -1
@@ -45,8 +42,9 @@ func (l *Lexer) Init(reader io.Reader) {
 
 //go:generate goyacc -o grammer.go grammer.y
 func (l *Lexer) Error(e string) {
-	error := &Error{e: errors.New(e), position: &(*l.position)}
-	l.error = error
+	message := fmt.Sprintf("%s in %d:%d.", e, (*l).position.line, (*l).position.column)
+	err := errors.New(message)
+	l.error = err
 }
 
 func (l *Lexer) parseFloat(str string) float64 {
