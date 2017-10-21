@@ -135,9 +135,10 @@ func (l *Lexer) scanString(start rune) {
 		case next == start:
 			return
 		case next == '\\':
-			if strings.IndexRune(`"\/bfnrt`, l.Peek()) >= 0 {
+			if l.Peek() == start {
 				l.Next()
-				break
+			} else if strings.IndexRune(`\/bfnrt`, l.Peek()) >= 0 {
+				l.Next()
 			} else if r := l.Next(); r == 'u' {
 				for i := 0; i < 4; i++ {
 					if strings.IndexRune("0123456789ABDEFabcdef", l.Peek()) >= 0 {

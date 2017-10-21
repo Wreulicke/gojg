@@ -16,7 +16,10 @@ type result struct {
 
 func TestParseString(t *testing.T) {
 	mustParse(t, `"test"`)
-	mustParse(t, `'test'`)
+	mustParse(t, `'"test'`)
+	mustParse(t, `"\"test"`)
+	mustParse(t, `'"test'`)
+	mustParse(t, `'\'test'`)
 	mustParse(t, `"{{test}}"`)
 	mustParse(t, `'{{test}}'`)
 }
