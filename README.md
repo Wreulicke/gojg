@@ -3,10 +3,10 @@
 ## TODO
 
 - [x] Implement parser
-- [ ] Command Line Interface
-  - [ ] output
-    - [ ] to stdout
-    - [ ] to file
+- [x] Command Line Interface
+  - [x] output
+    - [x] to stdout
+    - [x] to file
   - [x] input as template file
     - [x] from file
     - [x] from stdin

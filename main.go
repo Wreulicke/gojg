@@ -17,6 +17,13 @@ func resolveTemplate() *bufio.Reader {
 	return bufio.NewReader(os.Stdin)
 }
 
+func output() *bufio.Writer {
+	if *outputFile != nil {
+		return bufio.NewWriter(*outputFile)
+	}
+	return bufio.NewWriter(os.Stdout)
+}
+
 func close() {
 	if *template != nil {
 		(*template).Close()
@@ -27,6 +34,8 @@ var (
 	verbose    = kingpin.Flag("verbose", "Set verbose mode").Short('v').Bool()
 	contextMap = kingpin.Flag("context", "Context Parameter").Short('c').StringMap()
 	template   = kingpin.Arg("template", "Template File").File()
+	outputFile = kingpin.Flag("output", "Output File").Short('o').
+			OpenFile(os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 )
 
 func main() {
@@ -43,7 +52,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	writer := bufio.NewWriter(os.Stdout)
+	writer := output()
 
 	context := make(map[string]interface{}, len(*contextMap))
 	for k, v := range *contextMap {
