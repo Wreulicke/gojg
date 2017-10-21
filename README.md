@@ -11,6 +11,7 @@
     - [ ] from file
     - [ ] from stdin
 - [ ] Resolve template parameter
+  - [x] from CLI parameter
   - [ ] from JSON
     - [ ] from file
     - [ ] from stdin
