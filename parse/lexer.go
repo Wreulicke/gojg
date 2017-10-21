@@ -3,7 +3,6 @@ package parse
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -42,8 +41,7 @@ func (l *Lexer) Init(reader io.Reader) {
 
 //go:generate goyacc -o grammer.go grammer.y
 func (l *Lexer) Error(e string) {
-	message := fmt.Sprintf("%s in %d:%d.", e, (*l).position.line, (*l).position.column)
-	err := errors.New(message)
+	err := fmt.Errorf("%s in %d:%d", e, (*l).position.line, (*l).position.column)
 	l.error = err
 }
 
