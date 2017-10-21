@@ -8,7 +8,7 @@
     - [ ] to stdout
     - [ ] to file
   - [ ] input as template file
-    - [ ] from file
+    - [x] from file
     - [ ] from stdin
 - [ ] Resolve template parameter
   - [x] from CLI parameter
