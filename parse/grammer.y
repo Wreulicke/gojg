@@ -107,7 +107,7 @@ member:
     | string_or_template COLON value {
         $$ = &ast.MemberNode{Name: $1, Value: $3}
     }
-    
+
 members: 
     member {
         $$ = []ast.MemberNode{*$1}
