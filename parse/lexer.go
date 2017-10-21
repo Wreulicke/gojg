@@ -124,10 +124,6 @@ func (l *Lexer) scanIdentifier() {
 
 	for next = l.Peek(); isIdentifierPart(next); {
 		l.Next()
-		text := l.buffer.String()
-		if text == "bool" {
-			return
-		}
 		next = l.Peek()
 	}
 }
@@ -239,9 +235,7 @@ retry:
 		}
 		l.scanIdentifier()
 		text := l.TokenText()
-		if text == "bool" {
-			return BOOLEAN_PREFIX
-		} else if text == "false" {
+		if text == "false" {
 			return FALSE
 		} else if text == "null" {
 			return NULL

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/wreulicke/gojg/ast"
 	"github.com/wreulicke/gojg/context"
@@ -60,28 +59,7 @@ func (g *generatorImpl) writeRawValue(context context.Context, node *ast.RawValu
 }
 
 func (g *generatorImpl) writeBoolean(node *ast.BooleanNode) error {
-	writer := g.writer
-	if node.ID != nil {
-		fmt.Println(node.ID.Name)
-		if f, ok := g.context[node.ID.Name]; ok {
-			value := f(g.context)
-			if str, ok := value.(string); ok {
-				if bool, err := strconv.ParseBool(str); err != nil {
-					return err
-				} else if bool {
-					_, e := g.writer.WriteString("true")
-					return e
-				} else {
-					_, e := g.writer.WriteString("false")
-					return e
-				}
-			} else {
-				return g.Generate(value)
-			}
-		}
-		return fmt.Errorf("value:%s is not found", node.ID.Name)
-	}
-	_, err := writer.WriteString(fmt.Sprint(node.Value))
+	_, err := g.writer.WriteString(fmt.Sprint(node.Value))
 	return err
 }
 

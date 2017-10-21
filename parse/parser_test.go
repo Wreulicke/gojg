@@ -24,7 +24,6 @@ func TestParseStringWithFailure(t *testing.T) {
 }
 
 func TestParseBool(t *testing.T) {
-	mustParse(t, "bool(test)")
 	mustParse(t, "true")
 	mustParse(t, "false")
 }
@@ -55,7 +54,6 @@ func TestParseObject(t *testing.T) {
 	mustParse(t, `{"test": 1}`)
 	mustParse(t, `{"test": -1}`)
 	mustParse(t, `{"test": {{test}}}`)
-	mustParse(t, `{"test": bool(test)}`)
 	mustParse(t, `{"test": "{{test}}"}`)
 	mustParse(t, `{"{{xxx}}": "{{test}}"}`)
 	mustParse(t, `{"test": [
@@ -67,8 +65,7 @@ func TestParseObject(t *testing.T) {
 		"{{test}}",
 		true,
 		false,
-		null,
-		bool(test)
+		null
 	]}`)
 }
 

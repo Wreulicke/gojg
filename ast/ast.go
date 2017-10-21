@@ -16,7 +16,6 @@ type StringNode struct {
 
 type BooleanNode struct {
 	Value bool
-	ID    *ID
 }
 
 type NullNode struct{}

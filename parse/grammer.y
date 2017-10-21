@@ -11,7 +11,7 @@ import "github.com/wreulicke/gojg/ast"
     token Token
 }
 
-%type<ast> json_template value boolean_template raw_value_template array object
+%type<ast> json_template value raw_value_template array object
 %type<ast> string_or_template number_literal
 %type<values> elements members
 %token<token> MINUS 
@@ -36,10 +36,7 @@ json_template: value {
 }
 
 value: 
-    boolean_template {
-        $$ = $1
-    }
-    | FALSE {
+    FALSE {
         $$ = &ast.BooleanNode{Value: false}
     }
     | NULL {
@@ -87,11 +84,6 @@ number_literal:
 raw_value_template: 
     TEMPLATE_BEGIN ID TEMPLATE_END {
         $$ = &ast.RawValueTemplateNode{ID: &ast.ID{$2.literal}}
-    }
-
-boolean_template: 
-    BOOLEAN_PREFIX BRACE_BEGIN ID BRACE_END { 
-        $$ = &ast.BooleanNode{ID: &ast.ID{$3.literal}}
     }
 
 object: 

@@ -16,9 +16,6 @@ type Context map[string]Resolver
 func resolveValue(context Context, node ast.AST) interface{} {
 	switch n := node.(type) {
 	case *ast.BooleanNode:
-		if n.ID != nil {
-			return context[n.ID.Name](context)
-		}
 		return n.Value
 	case *ast.RawValueTemplateNode:
 		return context[n.ID.Name](context)
