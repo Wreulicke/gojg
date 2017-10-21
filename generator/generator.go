@@ -47,7 +47,7 @@ func NewGenerator(context map[string]interface{}, writer *bufio.Writer) Generato
 func (g *generatorImpl) writeRawValue(context map[string]interface{}, node *ast.RawValueTemplateNode) error {
 	if v, ok := context[node.ID.Name]; ok {
 		if err := g.Generate(v); err != nil {
-			_, e := g.writer.WriteString(fmt.Sprintf("%v", v))
+			_, e := g.writer.WriteString(fmt.Sprint(v))
 			return e
 		}
 	}
@@ -89,7 +89,7 @@ func (g *generatorImpl) writeString(node *ast.StringNode) error {
 	writer := g.writer
 	if node.ID != nil {
 		if value, ok := g.context[node.ID.Name]; ok {
-			return g.writeString(&ast.StringNode{Value: fmt.Sprintf("%v", value)})
+			return g.writeString(&ast.StringNode{Value: fmt.Sprint(value)})
 		}
 		return fmt.Errorf("value:%s is not found", node.ID.Name)
 	}
