@@ -7,9 +7,9 @@
   - [ ] output
     - [ ] to stdout
     - [ ] to file
-  - [ ] input as template file
+  - [x] input as template file
     - [x] from file
-    - [ ] from stdin
+    - [x] from stdin
 - [ ] Resolve template parameter
   - [x] from CLI parameter
   - [ ] from JSON
