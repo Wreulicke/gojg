@@ -52,6 +52,8 @@ func TestParseArray(t *testing.T) {
 func TestParseObject(t *testing.T) {
 	mustParse(t, `{}`)
 	mustParse(t, `{test: 1}`)
+	mustParse(t, `{'test': 1}`)
+	mustParse(t, `{'"test': 1}`)
 	mustParse(t, `{"test": 1}`)
 	mustParse(t, `{"test": -1}`)
 	mustParse(t, `{"test": {{test}}}`)

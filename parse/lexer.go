@@ -129,10 +129,10 @@ func (l *Lexer) scanIdentifier() {
 	}
 }
 
-func (l *Lexer) scanString() {
+func (l *Lexer) scanString(start rune) {
 	for {
 		switch next := l.Next(); {
-		case next == '"':
+		case next == start:
 			return
 		case next == '\\':
 			if strings.IndexRune(`"\/bfnrt`, l.Peek()) >= 0 {
@@ -181,8 +181,14 @@ func (l *Lexer) TokenText() string {
 func (l *Lexer) Scan() int {
 retry:
 	switch next := l.Next(); {
+	case next == '\'':
+		l.scanString('\'')
+		text := l.TokenText()
+		l.buffer.Reset()
+		l.buffer.WriteString(text[1 : len(text)-1])
+		return STRING
 	case next == '"':
-		l.scanString()
+		l.scanString('"')
 		text := l.TokenText()
 		if len(text) < 2 {
 			l.Error("expected 1 or more character")
