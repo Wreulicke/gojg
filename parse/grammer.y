@@ -112,6 +112,9 @@ members:
     member {
         $$ = []ast.MemberNode{*$1}
     }
+    | member COMMA{
+        $$ = []ast.MemberNode{*$1}
+    }
     | member COMMA members {
         size := len($3)+1
         values := make([]ast.MemberNode, 0, size)
@@ -130,6 +133,9 @@ array:
 
 elements: 
     value { 
+        $$ = []ast.AST{$1}
+    }
+    | value COMMA { 
         $$ = []ast.AST{$1}
     }
     | value COMMA elements {   

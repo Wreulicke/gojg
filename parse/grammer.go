@@ -67,7 +67,7 @@ const yyEofCode = 1
 const yyErrCode = 2
 const yyInitialStackSize = 16
 
-//line grammer.y:143
+//line grammer.y:149
 
 //line yacctab:1
 var yyExca = [...]int{
@@ -106,13 +106,13 @@ var yyR1 = [...]int{
 
 	0, 1, 2, 2, 2, 2, 2, 2, 2, 2,
 	7, 7, 6, 6, 3, 5, 5, 8, 8, 9,
-	9, 4, 4, 10, 10,
+	9, 9, 4, 4, 10, 10, 10,
 }
 var yyR2 = [...]int{
 
 	0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	1, 1, 2, 1, 3, 2, 3, 3, 3, 1,
-	3, 2, 3, 1, 3,
+	2, 3, 2, 3, 1, 2, 3,
 }
 var yyChk = [...]int{
 
@@ -125,8 +125,8 @@ var yyDef = [...]int{
 
 	0, -2, 1, 2, 3, 4, 5, 6, 7, 8,
 	9, 0, 13, 0, 0, 0, 10, 11, 12, 0,
-	15, 0, 19, 0, 0, 21, 0, 23, 14, 16,
-	0, 0, 0, 22, 0, 20, 17, 18, 24,
+	15, 0, 19, 0, 0, 22, 0, 24, 14, 16,
+	20, 0, 0, 23, 25, 21, 17, 18, 26,
 }
 var yyTok1 = [...]int{
 
@@ -599,8 +599,14 @@ yydefault:
 			yyVAL.members = []ast.MemberNode{*yyDollar[1].member}
 		}
 	case 20:
-		yyDollar = yyS[yypt-3 : yypt+1]
+		yyDollar = yyS[yypt-2 : yypt+1]
 		//line grammer.y:115
+		{
+			yyVAL.members = []ast.MemberNode{*yyDollar[1].member}
+		}
+	case 21:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		//line grammer.y:118
 		{
 			size := len(yyDollar[3].members) + 1
 			values := make([]ast.MemberNode, 0, size)
@@ -608,27 +614,33 @@ yydefault:
 			values = append(values, yyDollar[3].members...)
 			yyVAL.members = values
 		}
-	case 21:
+	case 22:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line grammer.y:124
+		//line grammer.y:127
 		{
 			yyVAL.ast = &ast.ArrayNode{Value: []ast.AST{}}
 		}
-	case 22:
+	case 23:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line grammer.y:127
+		//line grammer.y:130
 		{
 			yyVAL.ast = &ast.ArrayNode{Value: yyDollar[2].values}
 		}
-	case 23:
+	case 24:
 		yyDollar = yyS[yypt-1 : yypt+1]
-		//line grammer.y:132
+		//line grammer.y:135
 		{
 			yyVAL.values = []ast.AST{yyDollar[1].ast}
 		}
-	case 24:
+	case 25:
+		yyDollar = yyS[yypt-2 : yypt+1]
+		//line grammer.y:138
+		{
+			yyVAL.values = []ast.AST{yyDollar[1].ast}
+		}
+	case 26:
 		yyDollar = yyS[yypt-3 : yypt+1]
-		//line grammer.y:135
+		//line grammer.y:141
 		{
 			size := len(yyDollar[3].values) + 1
 			values := make([]ast.AST, 0, size)

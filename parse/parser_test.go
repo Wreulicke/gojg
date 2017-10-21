@@ -49,10 +49,13 @@ func TestParseNumber(t *testing.T) {
 func TestParseArray(t *testing.T) {
 	mustParse(t, "[]")
 	mustParse(t, `["test", 1]`)
+	mustParse(t, `["test", 1, ]`)
 	mustParse(t, `['test', 1]`)
 	mustParse(t, "[1, {{test}}]")
+	mustParse(t, "[1, {{test}}, ]")
 	mustParse(t, "[{{test}}, -1]")
 	mustParse(t, `["{{test}}"]`)
+	mustParse(t, `["{{test}}", ]`)
 }
 
 func TestParseObject(t *testing.T) {
@@ -61,10 +64,15 @@ func TestParseObject(t *testing.T) {
 	mustParse(t, `{'test': 1}`)
 	mustParse(t, "{'test': `hogehoge\r\nhogehoge`}")
 	mustParse(t, `{'"test': 1}`)
+	mustParse(t, `{'"test': 1, }`)
 	mustParse(t, `{"test": 1}`)
 	mustParse(t, `{"test": -1}`)
 	mustParse(t, `{"test": {{test}}}`)
 	mustParse(t, `{"test": "{{test}}"}`)
+	mustParse(t, `{
+		"fuga": "{{test}}",
+		"hoge": "{{test}}",
+	}`)
 	mustParse(t, `{"{{xxx}}": "{{test}}"}`)
 	mustParse(t, `{"test": [
 		1,
