@@ -136,6 +136,9 @@ func (l *Lexer) scanMultilineString() {
 			return
 		case next == '\\':
 			if l.Peek() == '`' {
+				text := l.TokenText()
+				l.buffer.Reset()
+				l.buffer.WriteString(text[:len(text)-1])
 				l.Next()
 			} else if strings.IndexRune(`\/bfnrt`, l.Peek()) >= 0 {
 				l.Next()
