@@ -10,7 +10,7 @@
   - [x] input as template file
     - [x] from file
     - [x] from stdin
-- [x] Resolve template parameter
+- [ ] Resolve template parameter
   - [x] from CLI parameter
   - [x] from JSON
     - [x] from file
