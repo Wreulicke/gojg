@@ -16,7 +16,9 @@ type result struct {
 
 func TestParseString(t *testing.T) {
 	mustParse(t, `"test"`)
+	mustParse(t, `'test'`)
 	mustParse(t, `"{{test}}"`)
+	mustParse(t, `'{{test}}'`)
 }
 
 func TestParseStringWithFailure(t *testing.T) {
@@ -44,6 +46,7 @@ func TestParseNumber(t *testing.T) {
 func TestParseArray(t *testing.T) {
 	mustParse(t, "[]")
 	mustParse(t, `["test", 1]`)
+	mustParse(t, `['test', 1]`)
 	mustParse(t, "[1, {{test}}]")
 	mustParse(t, "[{{test}}, -1]")
 	mustParse(t, `["{{test}}"]`)
