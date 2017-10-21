@@ -93,6 +93,7 @@ func (l *Lexer) scanDigit(next rune) {
 			next = l.Peek()
 			if !isDigit(next) {
 				l.Error("digit expected for number exponent")
+				return
 			}
 			l.Next()
 			next = l.Peek()
