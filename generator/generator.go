@@ -1,18 +1,21 @@
 package generator
 
-import "github.com/wreulicke/gojg/ast"
+import (
+	"bufio"
+	"errors"
+	"fmt"
+	"strconv"
 
-import "fmt"
-import "bufio"
-import "errors"
-import "strconv"
+	"github.com/wreulicke/gojg/ast"
+	"github.com/wreulicke/gojg/context"
+)
 
 type Generator interface {
 	Generate(node ast.AST) error
 }
 
 type generatorImpl struct {
-	context map[string]interface{}
+	context context.Context
 	writer  *bufio.Writer
 }
 
@@ -38,26 +41,30 @@ func (g *generatorImpl) Generate(node ast.AST) error {
 		return errors.New("unexpected node type")
 	}
 }
-
-func NewGenerator(context map[string]interface{}, writer *bufio.Writer) Generator {
+func NewGenerator(context context.Context, writer *bufio.Writer) Generator {
 	g := generatorImpl{context: context, writer: writer}
 	return &g
 }
 
-func (g *generatorImpl) writeRawValue(context map[string]interface{}, node *ast.RawValueTemplateNode) error {
+func (g *generatorImpl) writeRawValue(context context.Context, node *ast.RawValueTemplateNode) error {
 	if v, ok := context[node.ID.Name]; ok {
-		if err := g.Generate(v); err != nil {
-			_, e := g.writer.WriteString(fmt.Sprint(v))
+		value := v(context)
+		err := g.Generate(value)
+		if err != nil {
+			_, e := g.writer.WriteString(fmt.Sprint(value))
 			return e
 		}
+		return err
 	}
-	return errors.New("cannot resolve value: id =" + node.ID.Name)
+	return errors.New("cannot resolve value: id=" + node.ID.Name)
 }
 
 func (g *generatorImpl) writeBoolean(node *ast.BooleanNode) error {
 	writer := g.writer
 	if node.ID != nil {
-		if value, ok := g.context[node.ID.Name]; ok {
+		fmt.Println(node.ID.Name)
+		if f, ok := g.context[node.ID.Name]; ok {
+			value := f(g.context)
 			if str, ok := value.(string); ok {
 				if bool, err := strconv.ParseBool(str); err != nil {
 					return err
@@ -89,7 +96,7 @@ func (g *generatorImpl) writeString(node *ast.StringNode) error {
 	writer := g.writer
 	if node.ID != nil {
 		if value, ok := g.context[node.ID.Name]; ok {
-			return g.writeString(&ast.StringNode{Value: fmt.Sprint(value)})
+			return g.writeString(&ast.StringNode{Value: fmt.Sprint(value(g.context))})
 		}
 		return fmt.Errorf("value:%s is not found", node.ID.Name)
 	}
@@ -183,7 +190,6 @@ func (g *generatorImpl) writeMember(node ast.AST) error {
 		if err != nil {
 			return err
 		}
-
 		err = g.Generate(v.Value)
 		if err != nil {
 			return err

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/wreulicke/gojg/context"
+
 	"github.com/alecthomas/kingpin"
 	"github.com/wreulicke/gojg/generator"
 	"github.com/wreulicke/gojg/parse"
@@ -31,10 +33,11 @@ func close() {
 }
 
 var (
-	verbose    = kingpin.Flag("verbose", "Set verbose mode").Short('v').Bool()
-	contextMap = kingpin.Flag("context", "Context Parameter").Short('c').StringMap()
-	template   = kingpin.Arg("template", "Template File").File()
-	outputFile = kingpin.Flag("output", "Output File").Short('o').
+	verbose     = kingpin.Flag("verbose", "Set verbose mode").Short('v').Bool()
+	contextMap  = kingpin.Flag("context", "Context Parameter").Short('c').StringMap()
+	contextFile = kingpin.Flag("context-file", "Context File").Short('f').File()
+	template    = kingpin.Arg("template", "Template File").File()
+	outputFile  = kingpin.Flag("output", "Output File").Short('o').
 			OpenFile(os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 )
 
@@ -54,9 +57,11 @@ func main() {
 
 	writer := output()
 
-	context := make(map[string]interface{}, len(*contextMap))
-	for k, v := range *contextMap {
-		context[k] = v
+	context, e := context.CreateContext(contextMap, contextFile)
+	if e != nil {
+		close()
+		fmt.Println(e)
+		os.Exit(1)
 	}
 
 	g := generator.NewGenerator(context, writer)
