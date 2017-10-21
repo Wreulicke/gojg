@@ -6,16 +6,18 @@ import "github.com/wreulicke/gojg/ast"
 %}
 
 %union{
-    ast ast.AST
-    values []ast.AST
-    token Token
+    ast     ast.AST
+    values  []ast.AST
+    token   Token
+    member *ast.MemberNode
     members []ast.MemberNode
-    string *ast.StringNode
+    string  *ast.StringNode
 }
 
 %type<ast> json_template value raw_value_template array object
 %type<ast> number_literal
 %type<string> string_or_template
+%type<member> member
 %type<members> members
 %type<values> elements
 %token<token> MINUS 
@@ -98,16 +100,23 @@ object:
     OBJECT_BEGIN members OBJECT_END {
         $$ = &ast.ObjectNode{Members: $2}
     }
-
-members: 
-    string_or_template COLON value {
-        $$ = []ast.MemberNode{ast.MemberNode{Name: $1, Value: $3}}
+member: 
+    ID COLON value {
+        $$ = &ast.MemberNode{Name: &ast.StringNode{Value: $1.literal}, Value: $3}
     }
-    | string_or_template COLON value COMMA members {
-        size := len($5)+1
+    | string_or_template COLON value {
+        $$ = &ast.MemberNode{Name: $1, Value: $3}
+    }
+    
+members: 
+    member {
+        $$ = []ast.MemberNode{*$1}
+    }
+    | member COMMA members {
+        size := len($3)+1
         values := make([]ast.MemberNode, 0, size)
-        values = append(values, ast.MemberNode{Name: $1, Value: $3})
-        values = append(values, $5...)
+        values = append(values, *$1)
+        values = append(values, $3...)
         $$ = values
     }
 
