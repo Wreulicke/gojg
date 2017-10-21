@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"os"
-	"reflect"
 
 	"github.com/wreulicke/gojg/ast"
 	"github.com/wreulicke/gojg/parse"
@@ -63,11 +62,4 @@ func CreateContext(contextMap *map[string]string, contextFile **os.File) (Contex
 		resolver(context, k, v)
 	}
 	return context, nil
-}
-func getTypeName(o interface{}) string {
-	t := reflect.TypeOf(o)
-	if t.Kind() == reflect.Ptr {
-		return "*" + t.Elem().Name()
-	}
-	return t.Name()
 }

@@ -40,6 +40,7 @@ func (g *generatorImpl) Generate(node ast.AST) error {
 		return errors.New("unexpected node type")
 	}
 }
+
 func NewGenerator(context context.Context, writer *bufio.Writer) Generator {
 	g := generatorImpl{context: context, writer: writer}
 	return &g
