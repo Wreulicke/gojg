@@ -46,18 +46,12 @@ func CreateContext(contextMap *map[string]string, contextFile **os.File) (Contex
 		switch t := node.(type) {
 		case *ast.ObjectNode:
 			for _, v := range t.Members {
-				if member, ok := v.(*ast.MemberNode); ok {
-					switch name := member.Name.(type) {
-					case *ast.StringNode:
-						if name.ID != nil {
-							key := "{{" + name.ID.Name + "}}"
-							resolver(context, key, member.Value)
-						} else {
-							resolver(context, name.Value, member.Value)
-						}
-					}
+				name := v.Name
+				if name.ID != nil {
+					key := "{{" + name.ID.Name + "}}"
+					resolver(context, key, v.Value)
 				} else {
-					return nil, errors.New("unexpected node type")
+					resolver(context, name.Value, v.Value)
 				}
 			}
 		default:

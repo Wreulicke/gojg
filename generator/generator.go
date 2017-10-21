@@ -156,24 +156,21 @@ func (g *generatorImpl) writeObject(node *ast.ObjectNode) error {
 	return nil
 }
 
-func (g *generatorImpl) writeMember(node ast.AST) error {
+func (g *generatorImpl) writeMember(node ast.MemberNode) error {
 	writer := g.writer
-	if v, ok := node.(*ast.MemberNode); ok {
-		err := g.Generate(v.Name)
-		if err != nil {
-			return err
-		}
-
-		_, err = writer.WriteRune(':')
-		if err != nil {
-			return err
-		}
-		err = g.Generate(v.Value)
-		if err != nil {
-			return err
-		}
-
-		return nil
+	err := g.Generate(node.Name)
+	if err != nil {
+		return err
 	}
-	return errors.New("unexpected object member")
+
+	_, err = writer.WriteRune(':')
+	if err != nil {
+		return err
+	}
+	err = g.Generate(node.Value)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

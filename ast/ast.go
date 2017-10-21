@@ -25,7 +25,7 @@ type ID struct {
 }
 
 type MemberNode struct {
-	Name  AST
+	Name  *StringNode
 	Value AST
 }
 
@@ -34,7 +34,7 @@ type ArrayNode struct {
 }
 
 type ObjectNode struct {
-	Members []AST
+	Members []MemberNode
 }
 
 type AST interface {

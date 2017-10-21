@@ -9,11 +9,15 @@ import "github.com/wreulicke/gojg/ast"
     ast ast.AST
     values []ast.AST
     token Token
+    members []ast.MemberNode
+    string *ast.StringNode
 }
 
 %type<ast> json_template value raw_value_template array object
-%type<ast> string_or_template number_literal
-%type<values> elements members
+%type<ast> number_literal
+%type<string> string_or_template
+%type<members> members
+%type<values> elements
 %token<token> MINUS 
 %token<token> NUMBER
 %token<token> FALSE
@@ -88,7 +92,7 @@ raw_value_template:
 
 object: 
     OBJECT_BEGIN OBJECT_END  {
-        $$ = &ast.ObjectNode{Members: []ast.AST{}}
+        $$ = &ast.ObjectNode{Members: []ast.MemberNode{}}
     }
     |
     OBJECT_BEGIN members OBJECT_END {
@@ -97,12 +101,12 @@ object:
 
 members: 
     string_or_template COLON value {
-        $$ = []ast.AST{&ast.MemberNode{Name: $1, Value: $3}}
+        $$ = []ast.MemberNode{ast.MemberNode{Name: $1, Value: $3}}
     }
     | string_or_template COLON value COMMA members {
         size := len($5)+1
-        values := make([]ast.AST, 0, size)
-        values = append(values, &ast.MemberNode{Name: $1, Value: $3})
+        values := make([]ast.MemberNode, 0, size)
+        values = append(values, ast.MemberNode{Name: $1, Value: $3})
         values = append(values, $5...)
         $$ = values
     }

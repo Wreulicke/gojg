@@ -15,21 +15,21 @@ func TestGenerateNumber(t *testing.T) {
 
 func TestGenerateObject(t *testing.T) {
 	mustGenerateAndTest(t, new(ast.ObjectNode), "{}")
-	mustGenerateAndTest(t, &ast.ObjectNode{Members: []ast.AST{}}, `{}`)
+	mustGenerateAndTest(t, &ast.ObjectNode{Members: []ast.MemberNode{}}, `{}`)
 	mustGenerateAndTest(t, &ast.ObjectNode{
-		Members: []ast.AST{
-			&ast.MemberNode{
+		Members: []ast.MemberNode{
+			ast.MemberNode{
 				Name:  &ast.StringNode{Value: "hogehoge"},
 				Value: &ast.StringNode{Value: "hogehoge"},
 			},
 		}}, `{"hogehoge":"hogehoge"}`)
 	mustGenerateAndTest(t, &ast.ObjectNode{
-		Members: []ast.AST{
-			&ast.MemberNode{
+		Members: []ast.MemberNode{
+			ast.MemberNode{
 				Name:  &ast.StringNode{Value: "hogehoge"},
 				Value: &ast.StringNode{Value: "hogehoge"},
 			},
-			&ast.MemberNode{
+			ast.MemberNode{
 				Name:  &ast.StringNode{Value: "vvv"},
 				Value: &ast.NumberNode{Value: 1.1},
 			},
