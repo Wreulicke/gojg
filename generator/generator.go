@@ -5,48 +5,93 @@ import "github.com/wreulicke/gojg/ast"
 import "fmt"
 import "bufio"
 import "errors"
+import "strconv"
 
-func Generate(node ast.AST, writer *bufio.Writer) error {
+type Generator interface {
+	Generate(node ast.AST) error
+}
+
+type generatorImpl struct {
+	context map[string]interface{}
+	writer  *bufio.Writer
+}
+
+func (g *generatorImpl) Generate(node ast.AST) error {
+	writer := g.writer
 	switch t := node.(type) {
 	case *ast.BooleanNode:
-		return writeBoolean(writer, t)
+		return g.writeBoolean(t)
 	case *ast.NumberNode:
-		return writeNumber(writer, t)
+		return g.writeNumber(t)
 	case *ast.NullNode:
 		_, err := writer.WriteString("null")
 		return err
 	case *ast.StringNode:
-		return writeString(writer, t)
+		return g.writeString(t)
 	case *ast.ArrayNode:
-		return writeArray(writer, t)
+		return g.writeArray(t)
 	case *ast.RawValueTemplateNode:
-		return errors.New("not implemented")
+		return g.writeRawValue(g.context, t)
 	case *ast.ObjectNode:
-		return writeObject(writer, t)
+		return g.writeObject(t)
 	default:
 		return errors.New("unexpected node type")
 	}
 }
 
-func writeBoolean(writer *bufio.Writer, node *ast.BooleanNode) error {
+func NewGenerator(context map[string]interface{}, writer *bufio.Writer) Generator {
+	g := generatorImpl{context: context, writer: writer}
+	return &g
+}
+
+func (g *generatorImpl) writeRawValue(context map[string]interface{}, node *ast.RawValueTemplateNode) error {
+	if v, ok := context[node.ID.Name]; ok {
+		if err := g.Generate(v); err != nil {
+			_, e := g.writer.WriteString(fmt.Sprintf("%v", v))
+			return e
+		}
+	}
+	return errors.New("cannot resolve value: id =" + node.ID.Name)
+}
+
+func (g *generatorImpl) writeBoolean(node *ast.BooleanNode) error {
+	writer := g.writer
 	if node.ID != nil {
-		fmt.Println("not implemented")
-		return errors.New("not implemented")
+		if value, ok := g.context[node.ID.Name]; ok {
+			if str, ok := value.(string); ok {
+				if bool, err := strconv.ParseBool(str); err != nil {
+					return err
+				} else if bool {
+					_, e := g.writer.WriteString("true")
+					return e
+				} else {
+					_, e := g.writer.WriteString("false")
+					return e
+				}
+			} else {
+				return g.Generate(value)
+			}
+		}
+		return fmt.Errorf("value:%s is not found", node.ID.Name)
 	}
 	_, err := writer.WriteString(fmt.Sprint(node.Value))
 	return err
 }
 
-func writeNumber(writer *bufio.Writer, node *ast.NumberNode) error {
+func (g *generatorImpl) writeNumber(node *ast.NumberNode) error {
+	writer := g.writer
 	// do not print raw value? TODO discussion
 	_, err := writer.WriteString(fmt.Sprint(node.Value))
 	return err
 }
 
-func writeString(writer *bufio.Writer, node *ast.StringNode) error {
+func (g *generatorImpl) writeString(node *ast.StringNode) error {
+	writer := g.writer
 	if node.ID != nil {
-		fmt.Println("not implemented")
-		return errors.New("not implemented")
+		if value, ok := g.context[node.ID.Name]; ok {
+			return g.writeString(&ast.StringNode{Value: fmt.Sprintf("%v", value)})
+		}
+		return fmt.Errorf("value:%s is not found", node.ID.Name)
 	}
 
 	var err error
@@ -65,13 +110,14 @@ func writeString(writer *bufio.Writer, node *ast.StringNode) error {
 	return err
 }
 
-func writeArray(writer *bufio.Writer, node *ast.ArrayNode) error {
+func (g *generatorImpl) writeArray(node *ast.ArrayNode) error {
+	writer := g.writer
 	_, err := writer.WriteRune('[')
 	if err != nil {
 		return err
 	}
 	if len(node.Value) > 0 {
-		err := Generate(node.Value[0], writer)
+		err := g.Generate(node.Value[0])
 
 		if err != nil {
 			return err
@@ -83,7 +129,7 @@ func writeArray(writer *bufio.Writer, node *ast.ArrayNode) error {
 				return err
 			}
 
-			err = Generate(v, writer)
+			err = g.Generate(v)
 			if err != nil {
 				return err
 			}
@@ -96,13 +142,14 @@ func writeArray(writer *bufio.Writer, node *ast.ArrayNode) error {
 	return nil
 }
 
-func writeObject(writer *bufio.Writer, node *ast.ObjectNode) error {
+func (g *generatorImpl) writeObject(node *ast.ObjectNode) error {
+	writer := g.writer
 	_, err := writer.WriteRune('{')
 	if err != nil {
 		return err
 	}
 	if len(node.Members) > 0 {
-		err := writeMember(writer, node.Members[0])
+		err := g.writeMember(node.Members[0])
 		if err != nil {
 			return err
 		}
@@ -111,7 +158,7 @@ func writeObject(writer *bufio.Writer, node *ast.ObjectNode) error {
 			if err != nil {
 				return err
 			}
-			err = writeMember(writer, v)
+			err = g.writeMember(v)
 			if err != nil {
 				return err
 			}
@@ -124,9 +171,10 @@ func writeObject(writer *bufio.Writer, node *ast.ObjectNode) error {
 	return nil
 }
 
-func writeMember(writer *bufio.Writer, node ast.AST) error {
+func (g *generatorImpl) writeMember(node ast.AST) error {
+	writer := g.writer
 	if v, ok := node.(*ast.MemberNode); ok {
-		err := Generate(v.Name, writer)
+		err := g.Generate(v.Name)
 		if err != nil {
 			return err
 		}
@@ -136,7 +184,7 @@ func writeMember(writer *bufio.Writer, node ast.AST) error {
 			return err
 		}
 
-		err = Generate(v.Value, writer)
+		err = g.Generate(v.Value)
 		if err != nil {
 			return err
 		}

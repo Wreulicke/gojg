@@ -38,7 +38,8 @@ func TestGenerateObject(t *testing.T) {
 func mustGenerateAndTest(t *testing.T, str ast.AST, expected string) {
 	buffer := new(bytes.Buffer)
 	writer := bufio.NewWriter(buffer)
-	err := Generate(str, writer)
+	g := NewGenerator(map[string]interface{}{}, writer)
+	err := g.Generate(str)
 	if err != nil {
 		t.Error(err)
 		return
