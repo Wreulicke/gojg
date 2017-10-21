@@ -129,6 +129,36 @@ func (l *Lexer) scanIdentifier() {
 	}
 }
 
+func (l *Lexer) scanMultilineString() {
+	for {
+		switch next := l.Next(); {
+		case next == '`':
+			return
+		case next == '\\':
+			if l.Peek() == '`' {
+				l.Next()
+			} else if strings.IndexRune(`\/bfnrt`, l.Peek()) >= 0 {
+				l.Next()
+			} else if r := l.Next(); r == 'u' {
+				for i := 0; i < 4; i++ {
+					if strings.IndexRune("0123456789ABDEFabcdef", l.Peek()) >= 0 {
+						l.Next()
+					} else {
+						l.Error("expected 4 hexadecimal digits")
+						return
+					}
+				}
+			} else {
+				l.Error("unsupported escape character")
+				return
+			}
+		case next == eof:
+			l.Error("unclosed string")
+			return
+		}
+	}
+}
+
 func (l *Lexer) scanString(start rune) {
 	for {
 		switch next := l.Next(); {
@@ -182,6 +212,12 @@ func (l *Lexer) TokenText() string {
 func (l *Lexer) Scan() int {
 retry:
 	switch next := l.Next(); {
+	case next == '`':
+		l.scanMultilineString()
+		text := l.TokenText()
+		l.buffer.Reset()
+		l.buffer.WriteString(text[1 : len(text)-1])
+		return STRING
 	case next == '\'':
 		l.scanString('\'')
 		text := l.TokenText()
