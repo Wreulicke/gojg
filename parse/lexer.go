@@ -216,6 +216,7 @@ retry:
 		l.scanMultilineString()
 		text := l.TokenText()
 		l.buffer.Reset()
+		text = fmt.Sprintf("%-q", text[1:len(text)-1])
 		l.buffer.WriteString(text[1 : len(text)-1])
 		return STRING
 	case next == '\'':
