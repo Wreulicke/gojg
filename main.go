@@ -11,8 +11,9 @@ import (
 )
 
 var (
-	verbose  = kingpin.Flag("verbose", "Set verbose mode").Short('v').Bool()
-	template = kingpin.Arg("template", "Template File").Required().String()
+	verbose    = kingpin.Flag("verbose", "Set verbose mode").Short('v').Bool()
+	template   = kingpin.Arg("template", "Template File").Required().String()
+	contextMap = kingpin.Flag("context", "values").Short('c').StringMap()
 )
 
 func main() {
@@ -30,15 +31,20 @@ func main() {
 	ast, e := parse.Parse(reader)
 	if e != nil {
 		f.Close()
-		fmt.Println("error1")
+		fmt.Println(e)
 		os.Exit(1)
 	}
 
 	writer := bufio.NewWriter(os.Stdout)
-	err := generator.Generate(ast, writer)
-	writer.WriteRune('\n')
-	writer.Flush()
-	if err != nil {
+
+	context := make(map[string]interface{}, len(*contextMap))
+	for k, v := range *contextMap {
+		context[k] = v
+	}
+
+	g := generator.NewGenerator(context, writer)
+	e = g.Generate(ast)
+	if e != nil {
 		f.Close()
 		fmt.Println(e)
 		os.Exit(1)
