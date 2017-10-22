@@ -19,6 +19,16 @@ func assertString(expected string) assertion {
 	}
 }
 
+func assertStringTemplate(expected string) assertion {
+	return func(t *testing.T, actual ast.AST) {
+		if node, ok := actual.(*ast.StringNode); !ok {
+			t.Errorf("unexpected node type. expected StringNode, but actual %s", getTypeName(actual))
+		} else if node.ID.Name != expected {
+			t.Errorf("error: expected %s, but actual %s", expected, node.Value)
+		}
+	}
+}
+
 func assertHasMember(memberName string) assertion {
 	return func(t *testing.T, actual ast.AST) {
 		node, ok := actual.(*ast.ObjectNode)
