@@ -37,7 +37,7 @@ const eof = -1
 
 func (l *Lexer) Init(reader io.Reader) {
 	l.input = bufio.NewReader(reader)
-	l.position = &Position{}
+	l.position = &Position{line: 1}
 }
 
 //go:generate goyacc -o grammer.go grammer.y
