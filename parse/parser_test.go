@@ -2,6 +2,7 @@ package parse
 
 import (
 	"bufio"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -9,7 +10,6 @@ import (
 )
 
 type result struct {
-	t *testing.T
 	v ast.AST
 	e error
 }
@@ -22,6 +22,25 @@ func TestParseString(t *testing.T) {
 	mustParse(t, `'\'test'`)
 	mustParse(t, `"{{test}}"`)
 	mustParse(t, `'{{test}}'`)
+}
+
+var multilineStringTests = []struct {
+	code     string
+	expected string
+}{
+	{"`test\r\n\\hogehoge`", "test\r\n\\hogehoge"},
+}
+
+func TestParseMultilineString(t *testing.T) {
+	for _, test := range multilineStringTests {
+		r := mustParse(t, test.code)
+		expected := test.expected
+		if node, ok := r.v.(*ast.StringNode); !ok {
+			t.Errorf("unexpected node type. expected StringNode, but actual %s", getTypeName(r.v))
+		} else if node.Value != expected {
+			t.Errorf("error: expected %s, but actual %s", expected, node.Value)
+		}
+	}
 }
 
 func TestParseStringWithFailure(t *testing.T) {
@@ -104,5 +123,13 @@ func mustParse(t *testing.T, src string) result {
 		t.Errorf("error: %v, src: %s", err, src)
 		return result{e: err}
 	}
-	return result{t: t, v: r, e: nil}
+	return result{v: r, e: nil}
+}
+
+func getTypeName(o interface{}) string {
+	t := reflect.TypeOf(o)
+	if t.Kind() == reflect.Ptr {
+		return "*" + t.Elem().Name()
+	}
+	return t.Name()
 }
