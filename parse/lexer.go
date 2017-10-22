@@ -155,17 +155,23 @@ func (l *Lexer) scanString(start rune) {
 		switch {
 		case next == '\\':
 			l.Skip()
-			if l.Peek() == start {
+			next := l.Peek()
+			if next == start {
 				l.Next()
 			} else if next == 'b' {
+				l.Skip()
 				l.buffer.WriteRune('\b')
 			} else if next == 'f' {
+				l.Skip()
 				l.buffer.WriteRune('\f')
 			} else if next == 'n' {
+				l.Skip()
 				l.buffer.WriteRune('\n')
 			} else if next == 'r' {
+				l.Skip()
 				l.buffer.WriteRune('\r')
 			} else if next == 't' {
+				l.Skip()
 				l.buffer.WriteRune('\t')
 			} else if r := l.Peek(); r == 'u' {
 				l.Skip()
