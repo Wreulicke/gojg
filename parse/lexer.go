@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+	"unicode/utf16"
 	"unicode/utf8"
 
 	"github.com/wreulicke/gojg/ast"
@@ -151,21 +152,60 @@ func (l *Lexer) scanString(start rune) {
 			l.Skip()
 			return
 		}
-		l.Next()
 		switch {
 		case next == '\\':
+			l.Skip()
 			if l.Peek() == start {
 				l.Next()
-			} else if strings.IndexRune(`\/bfnrt`, l.Peek()) >= 0 {
-				l.Next()
-			} else if r := l.Next(); r == 'u' {
+			} else if next == 'b' {
+				l.buffer.WriteRune('\b')
+			} else if next == 'f' {
+				l.buffer.WriteRune('\f')
+			} else if next == 'n' {
+				l.buffer.WriteRune('\n')
+			} else if next == 'r' {
+				l.buffer.WriteRune('\r')
+			} else if next == 't' {
+				l.buffer.WriteRune('\t')
+			} else if r := l.Peek(); r == 'u' {
+				l.Skip()
+				bytes := ""
 				for i := 0; i < 4; i++ {
+					b := l.Peek()
 					if strings.IndexRune("0123456789ABDEFabcdef", l.Peek()) >= 0 {
-						l.Next()
+						bytes = bytes + string(b)
+						l.Skip()
 					} else {
 						l.Error("expected 4 hexadecimal digits")
 						return
 					}
+				}
+				b, _ := strconv.ParseUint(bytes, 16 /* hex */, 16 /* 2 bytes */)
+				if utf16.IsSurrogate(rune(b)) {
+					if l.Peek() == '\\' {
+						l.Skip()
+						if l.Peek() == 'u' {
+							l.Skip()
+							bytes := ""
+							for i := 0; i < 4; i++ {
+								b := l.Peek()
+								if strings.IndexRune("0123456789ABDEFabcdef", l.Peek()) >= 0 {
+									bytes = bytes + string(b)
+									l.Skip()
+								} else {
+									l.Error("expected 4 hexadecimal digits")
+									return
+								}
+							}
+							b2, _ := strconv.ParseUint(bytes, 16 /* hex */, 16 /* 2 bytes */)
+							l.buffer.WriteRune(utf16.DecodeRune(rune(b), rune(b2)))
+						}
+					} else {
+						l.Error("invalid surrogate pair")
+						return
+					}
+				} else {
+					l.buffer.WriteRune(rune(b))
 				}
 			} else {
 				l.Error("unsupported escape character")
@@ -177,6 +217,8 @@ func (l *Lexer) scanString(start rune) {
 		case next == eof:
 			l.Error("unclosed string")
 			return
+		default:
+			l.Next()
 		}
 	}
 }

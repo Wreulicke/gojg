@@ -2,7 +2,6 @@ package parse
 
 import (
 	"bufio"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -15,11 +14,6 @@ type result struct {
 }
 
 func TestParseString(t *testing.T) {
-	mustParse(t, `"test"`)
-	mustParse(t, `'"test'`)
-	mustParse(t, `"\"test"`)
-	mustParse(t, `'"test'`)
-	mustParse(t, `'\'test'`)
 	mustParse(t, `"{{test}}"`)
 	mustParse(t, `'{{test}}'`)
 }
@@ -28,17 +22,22 @@ var multilineStringTests = []struct {
 	code     string
 	expected string
 }{
+	{`"test"`, "test"},
+	{`'"test'`, `"test`},
+	{`"\"test"`, `"test`},
+	{`'\'test'`, `'test`},
+	{`"\u305f"`, "た"},
+	{`"\uD867\uDE3D"`, "𩸽"},
 	{"`test\r\n\\hogehoge`", "test\r\n\\hogehoge"},
 }
 
 func TestParseMultilineString(t *testing.T) {
 	for _, test := range multilineStringTests {
 		r := mustParse(t, test.code)
-		expected := test.expected
-		if node, ok := r.v.(*ast.StringNode); !ok {
-			t.Errorf("unexpected node type. expected StringNode, but actual %s", getTypeName(r.v))
-		} else if node.Value != expected {
-			t.Errorf("error: expected %s, but actual %s", expected, node.Value)
+		if r.e == nil {
+			assertString(test.expected)(t, r.v)
+		} else {
+			t.Errorf("unexpected parse failed")
 		}
 	}
 }
@@ -53,11 +52,22 @@ func TestParseBool(t *testing.T) {
 }
 
 func TestParseNull(t *testing.T) {
-	mustParse(t, "null")
+	r := mustParse(t, "null")
+	if _, ok := r.v.(*ast.NullNode); !ok {
+		t.Errorf("unexpected node type. expected NullNode, but actual %s", getTypeName(r.v))
+	}
+}
+
+func TestParseRawValueTemplate(t *testing.T) {
+	r := mustParse(t, "{{test}}")
+	if node, ok := r.v.(*ast.RawValueTemplateNode); !ok {
+		t.Errorf("unexpected node type. expected RawValueTemplateNode, but actual %s", getTypeName(r.v))
+	} else if node.ID.Name != "test" {
+		t.Errorf("unexpected referenced id. expected %s, but actulal %s", "test", node.ID)
+	}
 }
 
 func TestParseNumber(t *testing.T) {
-	mustParse(t, "{{test}}")
 	mustParse(t, "1")
 	mustParse(t, "-1")
 	mustParse(t, "4.5")
@@ -124,12 +134,4 @@ func mustParse(t *testing.T, src string) result {
 		return result{e: err}
 	}
 	return result{v: r, e: nil}
-}
-
-func getTypeName(o interface{}) string {
-	t := reflect.TypeOf(o)
-	if t.Kind() == reflect.Ptr {
-		return "*" + t.Elem().Name()
-	}
-	return t.Name()
 }
