@@ -24,6 +24,7 @@ var multilineStringTests = []struct {
 }{
 	{`"test"`, "test"},
 	{`'"test'`, `"test`},
+	{`'test\r\n'`, "test\r\n"},
 	{`"\"test"`, `"test`},
 	{`'\'test'`, `'test`},
 	{`"\u305f"`, "た"},
