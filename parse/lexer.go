@@ -313,7 +313,7 @@ func (l *Lexer) Peek() rune {
 	if err == io.EOF {
 		return eof
 	} else if err != nil {
-		l.Error("unexpected input error")
+		l.Error(err.Error())
 		return 0
 	}
 
