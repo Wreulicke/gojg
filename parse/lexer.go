@@ -131,42 +131,28 @@ func (l *Lexer) scanIdentifier() {
 
 func (l *Lexer) scanMultilineString() {
 	for {
-		switch next := l.Next(); {
+		switch next := l.Peek(); {
 		case next == '`':
+			l.Skip()
 			return
-		case next == '\\':
-			if l.Peek() == '`' {
-				text := l.TokenText()
-				l.buffer.Reset()
-				l.buffer.WriteString(text[:len(text)-1])
-				l.Next()
-			} else if strings.IndexRune(`\/bfnrt`, l.Peek()) >= 0 {
-				l.Next()
-			} else if r := l.Next(); r == 'u' {
-				for i := 0; i < 4; i++ {
-					if strings.IndexRune("0123456789ABDEFabcdef", l.Peek()) >= 0 {
-						l.Next()
-					} else {
-						l.Error("expected 4 hexadecimal digits")
-						return
-					}
-				}
-			} else {
-				l.Error("unsupported escape character")
-				return
-			}
 		case next == eof:
 			l.Error("unclosed string")
 			return
+		default:
+			l.Next()
 		}
 	}
 }
 
 func (l *Lexer) scanString(start rune) {
 	for {
-		switch next := l.Next(); {
-		case next == start:
+		next := l.Peek()
+		if next == start {
+			l.Skip()
 			return
+		}
+		l.Next()
+		switch {
 		case next == '\\':
 			if l.Peek() == start {
 				l.Next()
@@ -214,34 +200,28 @@ func (l *Lexer) TokenText() string {
 
 func (l *Lexer) Scan() int {
 retry:
-	switch next := l.Next(); {
-	case next == '`':
+	next := l.Peek()
+	if next == '`' {
+		l.Skip()
 		l.scanMultilineString()
-		text := l.TokenText()
-		l.buffer.Reset()
-		text = fmt.Sprintf("%-q", text[1:len(text)-1])
-		l.buffer.WriteString(text[1 : len(text)-1])
 		return STRING
-	case next == '\'':
+	} else if next == '\'' {
+		l.Skip()
 		l.scanString('\'')
-		text := l.TokenText()
-		l.buffer.Reset()
-		l.buffer.WriteString(text[1 : len(text)-1])
 		return STRING
-	case next == '"':
+	} else if next == '"' {
+		l.Skip()
 		l.scanString('"')
 		text := l.TokenText()
-		if len(text) < 2 {
-			l.Error("expected 1 or more character")
-		}
-		if strings.HasPrefix(text, `"{{`) && strings.HasSuffix(text, `}}"`) {
+		if strings.HasPrefix(text, `{{`) && strings.HasSuffix(text, `}}`) {
 			l.buffer.Reset()
-			l.buffer.WriteString(text[3 : len(text)-3])
+			l.buffer.WriteString(text[2 : len(text)-2])
 			return STRING_TEMPLATE
 		}
-		l.buffer.Reset()
-		l.buffer.WriteString(text[1 : len(text)-1])
 		return STRING
+	}
+	l.Next()
+	switch {
 	case next == ',':
 		return COMMA
 	case next == ':':
@@ -305,6 +285,19 @@ func (l *Lexer) Next() rune {
 	l.position.column += w
 	l.offset += w
 	l.buffer.WriteRune(r)
+	return r
+}
+
+func (l *Lexer) Skip() rune {
+	r, w, err := l.input.ReadRune()
+	if err == io.EOF {
+		return eof
+	}
+	if r == '\n' {
+		l.position = &Position{line: l.position.line + 1}
+	}
+	l.position.column += w
+	l.offset += w
 	return r
 }
 
