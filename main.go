@@ -33,18 +33,32 @@ func close() {
 }
 
 var (
-	verbose     = kingpin.Flag("verbose", "Set verbose mode").Short('v').Bool()
+	version     string
+	hash        string
+	buildtime   string
+	goversion   string
+	verbose     = kingpin.Flag("verbose", "Set verbose mode").Bool()
 	contextMap  = kingpin.Flag("context", "Context Parameter").Short('c').StringMap()
 	contextFile = kingpin.Flag("context-file", "Context File").Short('f').File()
+	details     = kingpin.Flag("details", "Binary Infomation").Short('d').Bool()
 	template    = kingpin.Arg("template", "Template File").File()
 	outputFile  = kingpin.Flag("output", "Output File").Short('o').
 			OpenFile(os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
 )
 
 func main() {
-	kingpin.Version("0.0.1")
+	kingpin.Version(version)
+	kingpin.CommandLine.VersionFlag.Short('v')
 	kingpin.CommandLine.HelpFlag.Short('h')
 	kingpin.Parse()
+
+	if *details == true {
+		fmt.Printf("version: %s\r\n", version)
+		fmt.Printf("commit hash: %s\r\n", hash)
+		fmt.Printf("build timestamp: %s\r\n", buildtime)
+		fmt.Printf("build go version: %s\r\n", goversion)
+		return
+	}
 
 	reader := resolveTemplate()
 

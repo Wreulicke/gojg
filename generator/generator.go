@@ -79,6 +79,7 @@ func (g *generatorImpl) writeString(node *ast.StringNode) error {
 		}
 		return fmt.Errorf("value:%s is not found", node.ID.Name)
 	}
+
 	if _, err := writer.WriteString(fmt.Sprintf("%q", node.Value)); err != nil {
 		return err
 	}
