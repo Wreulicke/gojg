@@ -4,8 +4,8 @@
 [[projects]]
   name = "github.com/alecthomas/kingpin"
   packages = ["."]
-  revision = "1087e65c9441605df944fb12c33f0fe7072d18ca"
-  version = "v2.2.5"
+  revision = "947dcec5ba9c011838740e680966fd7087a71d0d"
+  version = "v2.2.6"
 
 [[projects]]
   branch = "master"
@@ -19,15 +19,9 @@
   packages = ["."]
   revision = "2efee857e7cfd4f3d0138cc3cbb1b4966962b93a"
 
-[[projects]]
-  branch = "master"
-  name = "github.com/wreulicke/gojg"
-  packages = ["ast","context","generator","parse"]
-  revision = "8ace2bab65affbb98befedb45a8f0868cb75d2d1"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8b591d05eaa030a7168403cb59dbe662e8b6294cac2da5c68315f8865325febf"
+  inputs-digest = "861a773dfdf812b5c3f3c20beb8ab537793257efe0914534e30a2de44e6878f8"
   solver-name = "gps-cdcl"
   solver-version = 1
